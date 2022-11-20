@@ -75,13 +75,19 @@ public class ProjectMinimizer {
     }
 
     public void maximise() {
+        Metadata metadata;
+        try {
+            metadata = MetadataParser.parse(metadataPath + File.separator + METADATA_FILE_NAME);
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            return;
+        }
+        List<Instruction> instructionList = metadata.instructionList();
         try {
             FileUtils.copyDirectory(new File(workingProject), new File(buggyProject));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Metadata metadata = MetadataParser.parse(metadataPath + File.separator + METADATA_FILE_NAME);
-        List<Instruction> instructionList = metadata.instructionList();
         for (Instruction instruction : instructionList) {
             applyInstruction(instruction);
         }
