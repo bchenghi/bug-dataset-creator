@@ -6,29 +6,35 @@ import dataset.model.path.PathConfiguration;
 import dataset.model.project.DatasetProject;
 import dataset.model.project.MutationFrameworkDatasetProject;
 import jmutation.model.TestCase;
+import jmutation.trace.FileReader;
+import microbat.model.trace.Trace;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
-    public static void main(String[] args) {
-        String repoPath = String.join(File.separator ,"C:", "Users", "bchenghi", "Desktop");
-        String projectName = "minimize";
-        int bugId = 1;
-        minimize(repoPath, projectName, bugId);
-        maximise(repoPath, projectName, bugId);
-
-//        String repoPath = "C:\\Users\\bchenghi\\Desktop";
-//        String projectName = "math_70";
-//        int numOfCores = Runtime.getRuntime().availableProcessors() - 1;
-//        ExecutorService executorService = Executors.newFixedThreadPool(numOfCores);
-//        for (int bugId = 2; bugId <= 812; bugId++) {
-//            executorService.submit(updateExisting1(repoPath, projectName, bugId));
-//            minimize(repoPath, projectName, bugId);
+    public static void main(String[] args) throws InterruptedException {
+        String repoPath = "C:\\Users\\bchenghi\\Desktop";
+        String projectName = "math_70";
+        int numOfCores = Runtime.getRuntime().availableProcessors() - 1;
+        ExecutorService executorService = Executors.newFixedThreadPool(numOfCores);
+        for (int bugId = 1; bugId <= 812; bugId++) {
+            minimize(repoPath, projectName, bugId);
 //            maximise(repoPath, projectName, bugId);
-//        }
-//        executorService.shutdown();
+//            TraceCollector traceCollector = updateExisting(repoPath, projectName, bugId);
+//            TraceCollector traceCollector1 = updateExisting1(repoPath, projectName, bugId);
+//            if (traceCollector != null) executorService.submit(traceCollector);
+//            if (traceCollector1 != null) executorService.submit(traceCollector1);
+        }
+        executorService.shutdown();
+        executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        for (int bugId = 1; bugId <= 812; bugId++) {
+            minimize(repoPath, projectName, bugId);
+        }
         // Create buggy version + trace collection + minimize
     }
 
@@ -42,6 +48,12 @@ public class Main {
         // Get test case file
         DatasetProject project = new MutationFrameworkDatasetProject(buggyPath);
         TestCase testCase = project.getFailingTests().get(0);
+        String traceFileWAsserts = bugPath + File.separator + "traceWAsserts.exec";
+        String traceFile = bugPath + File.separator + "trace.exec";
+        if (checkTraceFile(traceFileWAsserts) && checkTraceFile(traceFile)) {
+            return null;
+        }
+
         return new TraceCollector(buggyPath, testCase, bugPath + File.separator + "precheck",
                 bugPath + File.separator + "trace.exec",
                 bugPath + File.separator + "traceWAsserts.exec");
@@ -58,9 +70,14 @@ public class Main {
         // Get test case file
         DatasetProject project = new MutationFrameworkDatasetProject(buggyPath);
         TestCase testCase = project.getFailingTests().get(0);
+        String traceFileWAsserts = bugPath + File.separator + "traceWorkingWAsserts.exec";
+        String traceFile = bugPath + File.separator + "traceWorking.exec";
+        if (checkTraceFile(traceFileWAsserts) && checkTraceFile(traceFile)) {
+            return null;
+        }
         return new TraceCollector(workingPath, testCase, bugPath + File.separator + "precheckWorking.exec",
-                bugPath + File.separator + "traceWorking.exec",
-                bugPath + File.separator + "traceWorkingWAssserts.exec");
+                traceFile,
+                traceFileWAsserts);
     }
 
     private static void createAndMinimize() {
@@ -99,5 +116,18 @@ public class Main {
         ProjectMinimizer minimizer = new ProjectMinimizer(repoPath, buggyPath, workingPath,
                 metadataPath);
         minimizer.maximise();
+    }
+
+    private static boolean checkTraceFile(String traceFile) {
+        try {
+            FileReader reader = new FileReader(traceFile);
+            Trace trace = reader.readMainTrace();
+            reader.close();
+            return trace.getExecutionList().size() > 0;
+        } catch (FileNotFoundException e) {
+            return false;
+        } catch (IOException e) {
+            return false;
+        }
     }
 }
