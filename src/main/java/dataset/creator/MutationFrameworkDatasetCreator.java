@@ -21,14 +21,27 @@ public class MutationFrameworkDatasetCreator {
     public static final String WORKING_PROJECT_DIR = "fix";
     private static final String CREATED_BUGGY_PROJECT_FILE = "createdBugs.json";
     public static int bugId = 0;
+    private final MutationFramework mutationFramework;
+
+    public MutationFrameworkDatasetCreator(MutationFramework mutationFramework) {
+        this.mutationFramework = mutationFramework;
+    }
+
+    public MutationFrameworkDatasetCreator() {
+        MutationFrameworkConfig mutationFrameworkConfig = new MutationFrameworkConfig();
+        MutationFramework mutationFramework = new MutationFramework();
+        mutationFramework.setConfig(mutationFrameworkConfig);
+        this.mutationFramework = mutationFramework;
+    }
 
     public static void main(String[] args) {
         String projectPath = String.join(File.separator, "sample", "math_70");
         String repoPath = "C:\\Users\\bchenghi\\Desktop\\path";
-        run(projectPath, repoPath);
+        MutationFrameworkDatasetCreator datasetCreator = new MutationFrameworkDatasetCreator();
+        datasetCreator.run(projectPath, repoPath);
     }
 
-    public static void run(String projectPath, String repositoryPath) {
+    public void run(String projectPath, String repositoryPath) {
         // Multi threading issues.
         // Rename precheck + instrumentation files with random values, and delete after reading.
         // Copy from microbat
@@ -38,16 +51,13 @@ public class MutationFrameworkDatasetCreator {
         generateWorkingProject(projectPath, String.join(File.separator, datasetPath, WORKING_PROJECT_DIR));
         int numOfCores = Runtime.getRuntime().availableProcessors() - 1;
         ExecutorService executorService = Executors.newFixedThreadPool(numOfCores);
-        MutationFrameworkConfig mutationFrameworkConfig = new MutationFrameworkConfig();
-        mutationFrameworkConfig.setProjectPath(projectPath);
-        MutationFramework mutationFramework = new MutationFramework();
-        mutationFramework.setConfig(mutationFrameworkConfig);
+        mutationFramework.getConfiguration().setProjectPath(projectPath);
         List<TestCase> testCaseList = mutationFramework.getTestCases();
         String createdBugsFilePath = String.join(File.separator, datasetPath, CREATED_BUGGY_PROJECT_FILE);
         JSONObject storedProjects = getStoredProjects(createdBugsFilePath);
         bugId = storedProjects.length();
         for (TestCase testCase : testCaseList) {
-            mutationFrameworkConfig.setTestCase(testCase);
+            mutationFramework.getConfiguration().setTestCase(testCase);
             List<MutationCommand> commands;
             try {
                 commands = mutationFramework.analyse();
