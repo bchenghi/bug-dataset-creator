@@ -1,6 +1,7 @@
 package dataset.creator;
 
 import dataset.TraceCollector;
+import dataset.minimize.ProjectMinimizer;
 import dataset.model.BuggyProject;
 import dataset.model.path.MutationFrameworkPathConfiguration;
 import dataset.model.path.PathConfiguration;
@@ -19,7 +20,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import static jmutation.dataset.DatasetCreator.bugId;
+import static dataset.creator.MutationFrameworkDatasetCreator.bugId;
 
 public class BuggyProjectCreator implements Runnable {
     private static final Object lock = new Object();
@@ -52,7 +53,8 @@ public class BuggyProjectCreator implements Runnable {
         mutationFramework.setConfig(configuration);
         configuration.setProjectPath(projectPath);
         configuration.setMutator(new HeuristicMutator());
-        StringBuilder mutatedProjPath = new StringBuilder(repositoryPath + File.separator + buggyProject.projectName() + File.separator);
+        StringBuilder mutatedProjPath = new StringBuilder(repositoryPath + File.separator +
+                buggyProject.projectName() + File.separator);
         int currBugId = increaseAndGetBugId();
         mutatedProjPath.append(currBugId);
         mutatedProjPath.append(File.separator);
@@ -73,8 +75,9 @@ public class BuggyProjectCreator implements Runnable {
             }
             createFile(buggyProject.testCase().toString(), mutatedProjPath.toString(), "testcase.txt");
             createFile(buggyProject.command().toString(), mutatedProjPath.toString(), "rootcause.txt");
-            runTraceCollection();
+            //runTraceCollection();
             writeToStorageFile();
+            minimize(mutatedProjPath.toString());
         } catch (RuntimeException e) {
             System.out.println(e);
         }
@@ -111,8 +114,23 @@ public class BuggyProjectCreator implements Runnable {
         // Get test case file
         DatasetProject project = new MutationFrameworkDatasetProject(buggyPath);
         TestCase testCase = project.getFailingTests().get(0);
-//        return new TraceCollector(workingPath, testCase, bugPath + File.separator + "precheckWorking.exec",
-//                bugPath + File.separator + "traceWorking.exec",
-//                bugPath + File.separator + DumpFilePathConfig);
+        TraceCollector workingTraceCollector = new TraceCollector(workingPath, testCase,
+                bugPath + File.separator + DumpFilePathConfig.DEFAULT_PRECHECK_FILE,
+                bugPath + File.separator + DumpFilePathConfig.DEFAULT_TRACE_FILE,
+                bugPath + File.separator + DumpFilePathConfig.DEFAULT_TRACE_W_ASSERTS_FILE);
+        workingTraceCollector.call();
+        TraceCollector buggyTraceCollector = new TraceCollector(workingPath, testCase,
+                bugPath + File.separator + DumpFilePathConfig.DEFAULT_BUGGY_PRECHECK_FILE,
+                bugPath + File.separator + DumpFilePathConfig.DEFAULT_BUGGY_TRACE_FILE,
+                bugPath + File.separator + DumpFilePathConfig.DEFAULT_BUGGY_TRACE_W_ASSERTS_FILE);
+        buggyTraceCollector.call();
+    }
+    private void minimize(String buggyProjectPath) {
+        PathConfiguration pathConfiguration = new MutationFrameworkPathConfiguration(repositoryPath);
+        String projectName = projectPath.substring(projectPath.lastIndexOf(File.separator) + 1);
+        String metadataPath = pathConfiguration.getRelativeMetadataPath(projectName, Integer.toString(bugId));
+        ProjectMinimizer minimizer = new ProjectMinimizer(repositoryPath, buggyProjectPath, projectPath,
+                metadataPath);
+        minimizer.minimize();
     }
 }
