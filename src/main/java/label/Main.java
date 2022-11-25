@@ -20,6 +20,24 @@ Temporary file
  */
 public class Main {
 	
+	/**
+	 * Assign label (probability) into each variable in buggyTrace. <br><br>
+	 * 
+	 * Probability = 1.0 mean the variable is correct. <br><br>
+	 * Probability = 0.0 mean the variable is wrong. <br><br>
+	 * Probability = -1.0 mean the correctness is undetermined. <br><br>
+	 * 
+	 * There are several reason for undetermined correctness: <br><br>
+	 * 1. Control Incorrect:  Cannot find matched node in correct trace.
+	 * There are no meaningful information given. <br><br>
+	 * 2. For Each Loop: By now the instrumentation of "For-Each" loop
+	 * have some problem such that it cannot give correct information. 
+	 * 
+	 * @param correctTrace Correct version of trace
+	 * @param buggyTrace Wrong version of trace
+	 * @param pairList PairList of trace pair
+	 * @param matcher DiffMatcher of trace pair
+	 */
 	public void assignLabel(final Trace correctTrace, final Trace buggyTrace, final PairList pairList, final DiffMatcher matcher) {
 		
 		Set<String> forEachLoopLocations = new HashSet<>();
@@ -102,12 +120,27 @@ public class Main {
 		}
 	}
 	
+	/**
+	 * Helper function to set all the given variable into the same label (probability).
+	 * @param vars List of variables
+	 * @param prob Probability or label
+	 */
 	private void setAllProb(List<VarValue> vars, double prob) {
 		for (VarValue var : vars) {
 			var.setProbability(prob);
 		}
 	}
 	
+	/**
+	 * Check is the given trace a for-each loop code statement. <br><br>
+	 * 
+	 * By now we just use a naive way to determine is the node a for-each loop:
+	 * If the code statement of this node start with "for(" and it contain a ":",
+	 * then it is a for each loop statement.
+	 * 
+	 * @param node Node to check
+	 * @return True if the node is for-each loop. False otherwise.
+	 */
 	private boolean isForEachLoop(TraceNode node) {
 		String code = node.getCodeStatement();
 		code = code.replaceAll("\\s+", "");
