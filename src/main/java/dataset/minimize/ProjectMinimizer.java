@@ -31,10 +31,10 @@ public class ProjectMinimizer {
         this.metadataPath = repoPath + File.separator + relativeMetadataPath;
     }
 
-    public void minimize() {
+    public boolean minimize() {
         if (!(new File(workingProject).exists() && new File(buggyProject).exists())) {
             System.out.println(workingProject + " " +  buggyProject + " does not exist");
-            return;
+            return false;
         }
         List<String> diffResult = GitWrapper.getRawDiff(workingProject, buggyProject);
         List<Instruction> instructionList = DiffParser.parse(diffResult, workingProject, buggyProject);
@@ -51,7 +51,9 @@ public class ProjectMinimizer {
             FileUtils.deleteDirectory(new File(buggyProject));
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
+        return true;
     }
 
     private void copyOverFiles(List<String> filesToCopy, String targetPath) {

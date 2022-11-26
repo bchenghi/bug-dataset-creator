@@ -43,7 +43,7 @@ public class BuggyProjectCreator implements Runnable {
         try (FileWriter writer = new FileWriter(new File(file, fileName))) {
             writer.write(contents);
         } catch (IOException e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
     }
 
@@ -53,11 +53,16 @@ public class BuggyProjectCreator implements Runnable {
         mutationFramework.setConfig(configuration);
         configuration.setProjectPath(projectPath);
         configuration.setMutator(new HeuristicMutator());
+
         StringBuilder mutatedProjPath = new StringBuilder(repositoryPath + File.separator +
                 buggyProject.projectName() + File.separator);
         int currBugId = increaseAndGetBugId();
         mutatedProjPath.append(currBugId);
         mutatedProjPath.append(File.separator);
+        configuration.getDumpFilePathConfig().setMutatedPrecheckFilePath(mutatedProjPath +
+                DumpFilePathConfig.DEFAULT_BUGGY_PRECHECK_FILE);
+        configuration.getDumpFilePathConfig().setMutatedTraceFilePath(mutatedProjPath +
+                DumpFilePathConfig.DEFAULT_BUGGY_TRACE_FILE);
         int mutatedBugPathLen = mutatedProjPath.length();
         mutatedProjPath.append(MutationFrameworkDatasetCreator.BUGGY_PROJECT_DIR);
         configuration.setMutatedProjectPath(mutatedProjPath.toString());
@@ -76,10 +81,10 @@ public class BuggyProjectCreator implements Runnable {
             createFile(buggyProject.testCase().toString(), mutatedProjPath.toString(), "testcase.txt");
             createFile(buggyProject.command().toString(), mutatedProjPath.toString(), "rootcause.txt");
             //runTraceCollection();
+            minimize(mutatedProjPath.toString(), currBugId);
             writeToStorageFile();
-            minimize(mutatedProjPath.toString());
         } catch (RuntimeException e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
     }
 
@@ -125,11 +130,15 @@ public class BuggyProjectCreator implements Runnable {
                 bugPath + File.separator + DumpFilePathConfig.DEFAULT_BUGGY_TRACE_W_ASSERTS_FILE);
         buggyTraceCollector.call();
     }
-    private void minimize(String buggyProjectPath) {
+
+    private void minimize(String buggyProjectPath, int bugId) {
         PathConfiguration pathConfiguration = new MutationFrameworkPathConfiguration(repositoryPath);
         String projectName = projectPath.substring(projectPath.lastIndexOf(File.separator) + 1);
         String metadataPath = pathConfiguration.getRelativeMetadataPath(projectName, Integer.toString(bugId));
-        ProjectMinimizer minimizer = new ProjectMinimizer(repositoryPath, buggyProjectPath, projectPath,
+        buggyProjectPath.substring(repositoryPath.length());
+        ProjectMinimizer minimizer = new ProjectMinimizer(repositoryPath, String.join(File.separator,
+                buggyProject.projectName(), Integer.toString(bugId), MutationFrameworkDatasetCreator.BUGGY_PROJECT_DIR),
+                String.join(File.separator, buggyProject.projectName(), MutationFrameworkDatasetCreator.WORKING_PROJECT_DIR),
                 metadataPath);
         minimizer.minimize();
     }

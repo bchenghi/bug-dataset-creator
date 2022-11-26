@@ -29,6 +29,7 @@ public class MutationFrameworkDatasetCreator {
 
     public MutationFrameworkDatasetCreator() {
         MutationFrameworkConfig mutationFrameworkConfig = new MutationFrameworkConfig();
+        mutationFrameworkConfig.setMicrobatConfigPath(mutationFrameworkConfig.getMicrobatConfigPath()); // Can be removed aft update
         MutationFramework mutationFramework = new MutationFramework();
         mutationFramework.setConfig(mutationFrameworkConfig);
         this.mutationFramework = mutationFramework;
@@ -36,7 +37,7 @@ public class MutationFrameworkDatasetCreator {
 
     public static void main(String[] args) {
         String projectPath = String.join(File.separator, "sample", "math_70");
-        String repoPath = "C:\\Users\\bchenghi\\Desktop\\path";
+        String repoPath = "D:\\chenghin\\NUS";
         MutationFrameworkDatasetCreator datasetCreator = new MutationFrameworkDatasetCreator();
         datasetCreator.run(projectPath, repoPath);
     }
@@ -62,6 +63,7 @@ public class MutationFrameworkDatasetCreator {
             try {
                 commands = mutationFramework.analyse();
             } catch (RuntimeException e) {
+                e.printStackTrace();
                 continue;
             }
             for (int i = 0; i < commands.size() && i < 7; i++) {
@@ -74,6 +76,7 @@ public class MutationFrameworkDatasetCreator {
                         createdBugsFilePath));
             }
         }
+        executorService.shutdown();
     }
 
     public static JSONObject getStoredProjects(String pathToFile) {
