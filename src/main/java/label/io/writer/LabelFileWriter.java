@@ -39,7 +39,7 @@ public class LabelFileWriter {
 		this.testFolder = testFolder;
 	}
 
-	private boolean write() {
+	public boolean write() {
 		DiffMatcher diffMatcher = createDiffMatcher();
 		PairList pairList = createPairList(diffMatcher);
 		Labeller labeller = new Labeller();
@@ -73,12 +73,11 @@ public class LabelFileWriter {
 	private Map<String, Double> createMapOfVarIdToProbs() {
 		Map<String, Double> result = new HashMap<>();
 		for (TraceNode node : buggyTrace.getExecutionList()) {
-			double prob = node.getProbability();
 			for (VarValue var : node.getReadVariables()) {
-				result.put(var.getVarID(), prob);
+				result.put(var.getVarID(), var.getProbability());
 			}
 			for (VarValue var : node.getWrittenVariables()) {
-				result.put(var.getVarID(), prob);
+				result.put(var.getVarID(), var.getProbability());
 			}
 		}
 		return result;

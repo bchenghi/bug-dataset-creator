@@ -7,13 +7,21 @@ abstract public class PathConfiguration {
     }
 
     abstract public String getBugPath(String projectName, String bugId);
-    abstract public String getBuggyPath(String projectName, String bugId);
+    
     abstract public String getFixPath(String projectName, String bugId);
-    abstract public String getRelativeBuggyPath(String projectName, String bugId);
     abstract public String getRelativeFixPath(String projectName, String bugId);
+    
+    abstract public String getBuggyPath(String projectName, String bugId);
+    abstract public String getRelativeBuggyPath(String projectName, String bugId);
+    
     abstract public String getRestorationInstructionsPath(String projectName, String bugId);
     abstract public String getRelativeRestorationInstructionsPath(String projectName, String bugId);
+    
     abstract public String getMetadataPath(String projectName, String bugId);
     abstract public String getRelativeMetadataPath(String projectName, String bugId);
+
+    abstract public String getLabelPath(String projectName, String bugId);
+    abstract public String getRelativeLabelPath(String projectName, String bugId);
+    
     abstract public String getStoragePath(String projectName);
 }

@@ -12,6 +12,7 @@ public class MutationFrameworkPathConfiguration extends PathConfiguration {
     private static final String BUGGY_DIR = "bug";
     private static final String WORKING_DIR = "fix";
     private static final String STORAGE_FILE = "createdBugs.json";
+    private static final String LABEL_FILE = "label.json";
     public MutationFrameworkPathConfiguration(String repoPath) {
         super(repoPath);
     }
@@ -59,7 +60,17 @@ public class MutationFrameworkPathConfiguration extends PathConfiguration {
     public String getRelativeRestorationInstructionsPath(String projectName, String bugId) {
         return String.join(File.separator, projectName, bugId, METADATA_DIR, METADATA_FILE_NAME);
     }
-
+    
+    @Override
+    public String getLabelPath(String projectName, String bugId) {
+    	return String.join(File.separator, getBugPath(projectName, bugId), getRelativeLabelPath(projectName, bugId));
+    }
+    
+    @Override
+    public String getRelativeLabelPath(String projectName, String bugId) {
+    	return String.join(File.separator, projectName, bugId, LABEL_FILE);
+    }
+    
     @Override
     public String getStoragePath(String projectName) {
         return String.join(File.separator, repoPath, projectName, STORAGE_FILE);
