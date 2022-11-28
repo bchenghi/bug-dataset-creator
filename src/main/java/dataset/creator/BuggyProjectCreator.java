@@ -69,23 +69,41 @@ public class BuggyProjectCreator implements Runnable {
         mutatedProjPath.delete(mutatedBugPathLen, mutatedBugPathLen + 3);
         configuration.setTestCase(buggyProject.testCase());
         try {
+        	print(currBugId, "Start mutating");
             MutationResult result = mutationFramework.mutate(buggyProject.command());
+        	print(currBugId, "Finish mutating");
             if (result.getMutatedPrecheckExecutionResult().testCasePassed()) {
                 try {
+                	print(currBugId, "Test case passed, deleting");
                     FileUtils.deleteDirectory(new File(mutatedProjPath.toString()));
+                	print(currBugId, "Test case passed, deleted");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
                 return;
             }
+        	print(currBugId, "Test case failed, creating testcase and rootcause files");
             createFile(buggyProject.testCase().toString(), mutatedProjPath.toString(), "testcase.txt");
             createFile(buggyProject.command().toString(), mutatedProjPath.toString(), "rootcause.txt");
+        	print(currBugId, "Created testcase and rootcause files. Minimizing.");
             //runTraceCollection();
-            minimize(mutatedProjPath.toString(), currBugId);
+            if (!minimize(mutatedProjPath.toString(), currBugId)) {
+                try {
+                	print(currBugId, "Minimize failed. Deleting.");
+                    FileUtils.deleteDirectory(new File(mutatedProjPath.toString()));
+                	print(currBugId, "Minimize failed. Deleted.");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return;
+            }
+        	print(currBugId, "Finish minimizing, writing to storage file");
             writeToStorageFile();
+        	print(currBugId, "Written to storage file");
         } catch (RuntimeException e) {
             e.printStackTrace();
         }
+    	print(currBugId, "Done");
     }
 
     private int increaseAndGetBugId() {
@@ -131,7 +149,7 @@ public class BuggyProjectCreator implements Runnable {
         buggyTraceCollector.call();
     }
 
-    private void minimize(String buggyProjectPath, int bugId) {
+    private boolean minimize(String buggyProjectPath, int bugId) {
         PathConfiguration pathConfiguration = new MutationFrameworkPathConfiguration(repositoryPath);
         String projectName = projectPath.substring(projectPath.lastIndexOf(File.separator) + 1);
         String metadataPath = pathConfiguration.getRelativeMetadataPath(projectName, Integer.toString(bugId));
@@ -140,6 +158,10 @@ public class BuggyProjectCreator implements Runnable {
                 buggyProject.projectName(), Integer.toString(bugId), MutationFrameworkDatasetCreator.BUGGY_PROJECT_DIR),
                 String.join(File.separator, buggyProject.projectName(), MutationFrameworkDatasetCreator.WORKING_PROJECT_DIR),
                 metadataPath);
-        minimizer.minimize();
+        return minimizer.minimize();
+    }
+    
+    private void print(int bugId, String msg) {
+    	System.out.println(bugId + ": " + msg);
     }
 }

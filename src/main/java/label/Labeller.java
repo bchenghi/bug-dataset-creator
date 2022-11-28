@@ -1,10 +1,5 @@
 package label;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
 import microbat.model.value.VarValue;
@@ -15,10 +10,16 @@ import tregression.empiricalstudy.MatchStepFinder;
 import tregression.model.PairList;
 import tregression.separatesnapshots.DiffMatcher;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+
 /*
 Temporary file
  */
-public class Main {
+public class Labeller {
 	
 	/**
 	 * Assign label (probability) into each variable in buggyTrace. <br><br>

@@ -66,7 +66,7 @@ public class MutationFrameworkDatasetCreator {
                 e.printStackTrace();
                 continue;
             }
-            for (int i = 0; i < commands.size() && i < 7; i++) {
+            for (int i = 0; i < commands.size(); i++) {
                 MutationCommand command = commands.get(i);
                 BuggyProject buggyProject = new BuggyProject(testCase, command, projectName);
                 if (checkBuggyProjectAlreadyCloned(storedProjects, buggyProject)) {
