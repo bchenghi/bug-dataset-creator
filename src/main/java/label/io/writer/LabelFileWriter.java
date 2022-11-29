@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import label.Labeller;
 import tregression.model.PairList;
+import microbat.model.BreakPoint;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
 import microbat.model.value.VarValue;
@@ -37,6 +38,8 @@ public class LabelFileWriter {
 		this.buggyProjectPath = buggyProjectPath;
 		this.srcFolder = srcFolder;
 		this.testFolder = testFolder;
+		attachFilePathToTrace(workingTrace, String.join(File.separator, workingProjectPath, srcFolder), String.join(File.separator, workingProjectPath, testFolder));
+		attachFilePathToTrace(buggyTrace, String.join(File.separator, buggyProjectPath, srcFolder), String.join(File.separator, buggyProjectPath, testFolder));
 	}
 
 	public boolean write() {
@@ -62,7 +65,9 @@ public class LabelFileWriter {
 	}
 	
 	private DiffMatcher createDiffMatcher() {
-		return new DiffMatcher(srcFolder, testFolder, workingProjectPath, buggyProjectPath);
+		DiffMatcher result = new DiffMatcher(srcFolder, testFolder, workingProjectPath, buggyProjectPath);
+		result.matchCode();
+		return result;
 	}
 	
 	private PairList createPairList(DiffMatcher diffMatcher) {
@@ -81,5 +86,23 @@ public class LabelFileWriter {
 			}
 		}
 		return result;
+	}
+
+	private void attachFilePathToTrace(Trace trace, String sourceFolder, String testFolder) {
+		for (TraceNode node : trace.getExecutionList()) {
+			BreakPoint point = node.getBreakPoint();
+			String relativePath = point.getDeclaringCompilationUnitName().replace(".", File.separator) + ".java";
+			String sourcePath = sourceFolder + File.separator + relativePath;
+			String testPath = testFolder + File.separator + relativePath;
+			if(new File(sourcePath).exists()) {
+				point.setFullJavaFilePath(sourcePath);
+			}
+			else if(new File(testPath).exists()) {
+				point.setFullJavaFilePath(testPath);
+			}
+			else {
+				System.err.println("cannot find the source code file for " + point);
+			}
+		}
 	}
 }

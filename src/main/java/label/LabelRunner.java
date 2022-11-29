@@ -1,15 +1,12 @@
 package label;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.lang.Runnable;
-import java.util.List;
 
 import dataset.model.path.MutationFrameworkPathConfiguration;
 import jmutation.model.mutation.DumpFilePathConfig;
 import label.io.writer.LabelFileWriter;
-import microbat.instrumentation.output.TraceOutputReader;
+import microbat.instrumentation.output.RunningInfo;
 import microbat.model.trace.Trace;
 
 public class LabelRunner implements Runnable {
@@ -30,18 +27,17 @@ public class LabelRunner implements Runnable {
 		Trace buggyTrace = getTrace(pathToBuggyTrace);
 		String pathToLabelFile = getPathToLabelFile();
 		LabelFileWriter writer = new LabelFileWriter(pathToLabelFile, workingTrace, 
-				buggyTrace, pathConfig.getFixPath(projectName, bugId), getBuggyPath(), 
-				"src/main/java", "src/test/java");
+				buggyTrace, pathConfig.getFixPath(projectName, bugId), pathConfig.getBuggyPath(projectName, bugId), 
+				String.join(File.separator, "src", "main", "java"), String.join(File.separator, "src", "test", "java"));
 		writer.write();
-		
 	}
 	
-	private String getBuggyPath() {
-		return pathConfig.getBuggyPath(projectName, bugId);
+	private String getBugPath() {
+		return pathConfig.getBugPath(projectName, bugId);
 	}
 
 	private String getPathToTrace(boolean isWorkingTrace) {
-		String bugPath = getBuggyPath();
+		String bugPath = getBugPath();
 		if (isWorkingTrace) {
 			return String.join(File.separator, bugPath, DumpFilePathConfig.DEFAULT_TRACE_FILE);
 		}
@@ -53,18 +49,8 @@ public class LabelRunner implements Runnable {
 	}
 	
 	private Trace getTrace(String path) {
-		try (FileInputStream inputStream = new FileInputStream(path)) {
-			TraceOutputReader reader = new TraceOutputReader(inputStream);
-			List<Trace> traces = reader.readTrace();
-			for (Trace trace : traces) {
-				if (trace.isMain()) {
-					return trace;
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
+		RunningInfo runningInfo = RunningInfo.readFromFile(path);
+		return runningInfo.getMainTrace();
 	}
 	
 }

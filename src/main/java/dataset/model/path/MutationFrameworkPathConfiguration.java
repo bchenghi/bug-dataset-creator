@@ -63,7 +63,7 @@ public class MutationFrameworkPathConfiguration extends PathConfiguration {
     
     @Override
     public String getLabelPath(String projectName, String bugId) {
-    	return String.join(File.separator, getBugPath(projectName, bugId), getRelativeLabelPath(projectName, bugId));
+    	return String.join(File.separator, getBugPath(projectName, bugId), LABEL_FILE);
     }
     
     @Override
