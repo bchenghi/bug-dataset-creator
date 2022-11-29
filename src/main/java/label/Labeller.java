@@ -11,6 +11,7 @@ import tregression.model.PairList;
 import tregression.separatesnapshots.DiffMatcher;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -157,5 +158,66 @@ public class Labeller {
 	
 	private String encodeNodeLocation(TraceNode node) {
 		return node.getBreakPoint().getFullJavaFilePath() + "_" + node.getLineNumber();
+	}
+	
+	/**
+	 * Construct a dictionary for confidence of calling API method <br><br>
+	 * 
+	 * Confidence of a API method is the probability that the API
+	 * is correctly used (output the correct result). <br><br>
+	 * 
+	 * Confidence=1 mean we are highly confidence that this API is used correctly. <br><br>
+	 * 
+	 * Confidence=0 mean we are not sure that this API is used correctly. <br><br>
+	 * 
+	 * Given a trace pair, we will find the total count (i.e. the total number of this
+	 * API is called and the correct count (i.e. count how many time the API is called
+	 * correctly. Confidence is calculated as correct count / total count. <br><br>
+	 * 
+	 * The confidence is store as a dictionary where the key is the API
+	 * method signature and the value is the correct count and total count.
+	 * @param correctTrace Correct version of trace
+	 * @param buggyTrace Buggy version of trace
+	 * @param pairList PairList of the trace pair
+	 * @param matcher DiffMatcher of the trace pair
+	 * @return Dictionary that store the confidence
+	 */
+	public APIConfidenceDict genAPIConfidenceDict(final Trace correctTrace, final Trace buggyTrace, final PairList pairList, final DiffMatcher matcher) {
+		final StepChangeTypeChecker checker = new StepChangeTypeChecker(buggyTrace, correctTrace);
+		APIConfidenceDict dictionary = new APIConfidenceDict();
+		
+		for (TraceNode node : buggyTrace.getExecutionList()) {
+			
+			// We will only handle the node that is calling API method
+			if (node.isCallingAPI()) {
+				final StepChangeType changeType = checker.getType(node, true, pairList, matcher);
+				final String invokingMethod = node.getInvokingMethod();
+				
+				if (invokingMethod == "") {
+					System.out.println("[Warning] node is calling api but do not have invoking method");
+					continue;
+				}
+				
+				/*
+				 * Given the source variables are correct:
+				 * 
+				 * if the target variable are correct, then the API is correctly called.
+				 * If the target variable are wrong, then the API is used incorrectly.
+				 */
+				if (changeType.getType() == StepChangeType.IDT) {
+					boolean isCorrect = true;
+					dictionary.addRecord(invokingMethod, isCorrect);
+				} else if (changeType.getType() == StepChangeType.SRC) {
+					boolean isCorrect = false;
+					dictionary.addRecord(invokingMethod, isCorrect);
+				}
+			}
+		}
+		
+		return dictionary;
+	}
+	
+	public APIConfidenceDict aggregateDict(Collection<APIConfidenceDict> dictionaries) {
+		return APIConfidenceDict.aggreateDict(dictionaries);
 	}
 }
