@@ -1,5 +1,7 @@
 package dataset.model.path;
 
+import jmutation.model.mutation.DumpFilePathConfig;
+
 abstract public class PathConfiguration {
     protected String repoPath;
     public PathConfiguration(String repoPath) {
@@ -24,4 +26,29 @@ abstract public class PathConfiguration {
     abstract public String getRelativeLabelPath(String projectName, String bugId);
     
     abstract public String getStoragePath(String projectName);
+    
+    abstract public String getInstrumentatorFilePath(String projectName, String bugId, InstrumentatorFile fileType);
+    
+    public static enum InstrumentatorFile {
+    	TRACE, BUGGY_TRACE, PRECHECK, BUGGY_PRECHECK, TRACE_W_ASSERTS, BUGGY_TRACE_W_ASSERTS;
+    	
+    	protected static String getFileName(InstrumentatorFile fileType) {
+    		switch(fileType) {
+			case TRACE:
+				return DumpFilePathConfig.DEFAULT_TRACE_FILE;
+			case BUGGY_PRECHECK:
+				return DumpFilePathConfig.DEFAULT_BUGGY_PRECHECK_FILE;
+			case BUGGY_TRACE:
+				return DumpFilePathConfig.DEFAULT_BUGGY_TRACE_FILE;
+			case BUGGY_TRACE_W_ASSERTS:
+				return DumpFilePathConfig.DEFAULT_BUGGY_TRACE_W_ASSERTS_FILE;
+			case PRECHECK:
+				return DumpFilePathConfig.DEFAULT_PRECHECK_FILE;
+			case TRACE_W_ASSERTS:
+				return DumpFilePathConfig.DEFAULT_TRACE_W_ASSERTS_FILE;
+			default:
+				return "";
+    		}
+    	}
+    }
 }

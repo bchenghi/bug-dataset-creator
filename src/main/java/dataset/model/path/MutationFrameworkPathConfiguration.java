@@ -21,6 +21,7 @@ public class MutationFrameworkPathConfiguration extends PathConfiguration {
     public String getBugPath(String projectName, String bugId) {
         return String.join(File.separator, repoPath, projectName, bugId);
     }
+    
     @Override
     public String getBuggyPath(String projectName, String bugId) {
         return String.join(File.separator, repoPath, projectName, bugId, BUGGY_DIR);
@@ -75,5 +76,10 @@ public class MutationFrameworkPathConfiguration extends PathConfiguration {
     public String getStoragePath(String projectName) {
         return String.join(File.separator, repoPath, projectName, STORAGE_FILE);
     }
-
+    
+    @Override
+    public String getInstrumentatorFilePath(String projectName, String bugId, InstrumentatorFile fileType) {
+    	String fileName = InstrumentatorFile.getFileName(fileType);
+    	return String.join(File.separator, getBugPath(projectName, bugId), fileName);
+    }
 }
