@@ -72,11 +72,11 @@ public class BuggyProjectCreator implements Runnable {
         	print(currBugId, "Start mutating");
             MutationResult result = mutationFramework.mutate(buggyProject.command());
         	print(currBugId, "Finish mutating");
-            if (result.getMutatedPrecheckExecutionResult().testCasePassed()) {
+            if (result.getMutatedPrecheckExecutionResult() == null || result.getMutatedPrecheckExecutionResult().testCasePassed()) {
                 try {
-                	print(currBugId, "Test case passed, deleting");
+                	print(currBugId, "Test case passed or precheck is null, deleting");
                     FileUtils.deleteDirectory(new File(mutatedProjPath.toString()));
-                	print(currBugId, "Test case passed, deleted");
+                	print(currBugId, "Test case passed or precheck is null, deleted");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -150,15 +150,19 @@ public class BuggyProjectCreator implements Runnable {
     }
 
     private boolean minimize(String buggyProjectPath, int bugId) {
+        ProjectMinimizer minimizer = createMinimizer(buggyProjectPath, bugId);
+        return minimizer.minimize();
+    }
+    
+    private ProjectMinimizer createMinimizer(String buggyProjectPath, int bugId) {
         PathConfiguration pathConfiguration = new MutationFrameworkPathConfiguration(repositoryPath);
         String projectName = projectPath.substring(projectPath.lastIndexOf(File.separator) + 1);
         String metadataPath = pathConfiguration.getRelativeMetadataPath(projectName, Integer.toString(bugId));
         buggyProjectPath.substring(repositoryPath.length());
-        ProjectMinimizer minimizer = new ProjectMinimizer(repositoryPath, String.join(File.separator,
+        return new ProjectMinimizer(repositoryPath, String.join(File.separator,
                 buggyProject.projectName(), Integer.toString(bugId), MutationFrameworkDatasetCreator.BUGGY_PROJECT_DIR),
                 String.join(File.separator, buggyProject.projectName(), MutationFrameworkDatasetCreator.WORKING_PROJECT_DIR),
                 metadataPath);
-        return minimizer.minimize();
     }
     
     private void print(int bugId, String msg) {

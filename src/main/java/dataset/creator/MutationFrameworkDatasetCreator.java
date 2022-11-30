@@ -57,6 +57,7 @@ public class MutationFrameworkDatasetCreator {
         String createdBugsFilePath = String.join(File.separator, datasetPath, CREATED_BUGGY_PROJECT_FILE);
         JSONObject storedProjects = getStoredProjects(createdBugsFilePath);
         bugId = storedProjects.length();
+        int mutationsLeft = 0;
         for (TestCase testCase : testCaseList) {
             mutationFramework.getConfiguration().setTestCase(testCase);
             List<MutationCommand> commands;
@@ -72,8 +73,10 @@ public class MutationFrameworkDatasetCreator {
                 if (checkBuggyProjectAlreadyCloned(storedProjects, buggyProject)) {
                     continue;
                 }
-                executorService.submit(new BuggyProjectCreator(repositoryPath, projectPath, buggyProject,
-                        createdBugsFilePath));
+                mutationsLeft++;
+                System.out.println(mutationsLeft);
+//                executorService.submit(new BuggyProjectCreator(repositoryPath, projectPath, buggyProject,
+//                        createdBugsFilePath));
             }
         }
         executorService.shutdown();

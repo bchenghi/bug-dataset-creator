@@ -11,11 +11,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 
-
 public class LabelRunnerTest {
-	private static final String TEST_FILES_PATH = String.join(File.separator, "src", "test", "files");
-	private static final String REPO_PATH = String.join(File.separator, TEST_FILES_PATH, "sample-repo");
+	private static final String TEST_FILES_PATH = String.join(File.separator, "src", "test", "files", "label");
 	private static final String PROJECT_NAME = "sample-project";
+	private static final String REPO_PATH = String.join(File.separator, TEST_FILES_PATH, PROJECT_NAME);
 	private static final String ACTUAL_LABEL_FILE_PATH = (new MutationFrameworkPathConfiguration(REPO_PATH)).getLabelPath(PROJECT_NAME, Integer.toString(1));
 	
 	@AfterEach

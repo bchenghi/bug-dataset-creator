@@ -13,6 +13,7 @@ public class MutationFrameworkDatasetProject extends DatasetProject {
     public MutationFrameworkDatasetProject(String projectPath) {
         super(projectPath);
     }
+    
     @Override
     public List<TestCase> getFailingTests() {
         String pathToTestCaseFile = projectPath.substring(0, projectPath.length() - 3) + TEST_CASE_FILE;
@@ -24,7 +25,7 @@ public class MutationFrameworkDatasetProject extends DatasetProject {
             TestCase testCase = new TestCase("signature", 0, 0, testMethod, testClass, null);
             result.add(testCase);
         } catch (IOException e) {
-
+        	e.printStackTrace();
         }
         return result;
     }
