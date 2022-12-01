@@ -14,50 +14,19 @@ import dataset.bug.model.project.MutationFrameworkDatasetProject;
 import jmutation.model.TestCase;
 
 public class TraceCreator implements Runnable {
-    private final String repositoryPath;
     private final String projectName;
     private final int bugId;
     private final PathConfiguration pathConfig;
 
     public TraceCreator(String repositoryPath, String projectName, int bugId) {
-        this.repositoryPath = repositoryPath;
         this.projectName = projectName;
         this.bugId = bugId;
         pathConfig = new MutationFrameworkPathConfiguration(repositoryPath);
     }
     
-    private boolean minimize(String buggyProjectPath, int bugId) {
-        ProjectMinimizer minimizer = createMinimizer(buggyProjectPath, bugId);
-        return minimizer.minimize();
-    }
-    
-    private void maximize(String buggyProjectPath, int bugId) {
-        ProjectMinimizer minimizer = createMinimizer(buggyProjectPath, bugId);
-        minimizer.maximise();
-    }
-    
-    private ProjectMinimizer createMinimizer(String buggyProjectPath, int bugId) {
-        PathConfiguration pathConfiguration = new MutationFrameworkPathConfiguration(repositoryPath);
-        String metadataPath = pathConfiguration.getRelativeMetadataPath(projectName, Integer.toString(bugId));
-        buggyProjectPath.substring(repositoryPath.length());
-        return new ProjectMinimizer(repositoryPath, String.join(File.separator,
-                projectName, Integer.toString(bugId), MutationFrameworkDatasetCreator.BUGGY_PROJECT_DIR),
-                String.join(File.separator, projectName, MutationFrameworkDatasetCreator.WORKING_PROJECT_DIR),
-                metadataPath);
-    }
-    
     public void run() {
     	if (isDone()) return;
-    	StringBuilder mutatedProjPath = new StringBuilder(repositoryPath + File.separator +
-            projectName + File.separator);
-	    mutatedProjPath.append(bugId);
-	    mutatedProjPath.append(File.separator);
-	    int mutatedBugPathLen = mutatedProjPath.length();
-	    mutatedProjPath.append(MutationFrameworkDatasetCreator.BUGGY_PROJECT_DIR);
-	    mutatedProjPath.delete(mutatedBugPathLen, mutatedBugPathLen + 3);
-    	maximize(mutatedProjPath.toString(), bugId);
     	runTraceCollection();
-    	minimize(mutatedProjPath.toString(), bugId);
     }
     
     private void runTraceCollection() {

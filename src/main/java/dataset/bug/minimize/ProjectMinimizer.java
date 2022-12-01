@@ -76,13 +76,13 @@ public class ProjectMinimizer {
         return file.substring(0, lastIdxOfSeparator);
     }
 
-    public void maximise() {
+    public boolean maximise() {
         Metadata metadata;
         try {
             metadata = MetadataParser.parse(metadataPath + File.separator + METADATA_FILE_NAME);
         } catch (RuntimeException e) {
             e.printStackTrace();
-            return;
+            return false;
         }
         List<Instruction> instructionList = metadata.instructionList();
         try {
@@ -93,6 +93,7 @@ public class ProjectMinimizer {
         for (Instruction instruction : instructionList) {
             applyInstruction(instruction);
         }
+        return true;
     }
 
     private void applyInstruction(Instruction instruction) {

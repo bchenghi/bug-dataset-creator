@@ -25,6 +25,7 @@ public class LabelRunner implements Runnable {
 	}
 	
 	public void run() {
+		if (isDone()) return;
 		String pathToWorkingTrace = getPathToTrace(true);
 		if (!fileExists(pathToWorkingTrace)) {
 			logger.log(Level.INFO, pathToWorkingTrace +" does not exist");
@@ -41,7 +42,9 @@ public class LabelRunner implements Runnable {
 		LabelFileWriter writer = new LabelFileWriter(pathToLabelFile, workingTrace, 
 				buggyTrace, pathConfig.getFixPath(projectName, bugId), pathConfig.getBuggyPath(projectName, bugId), 
 				String.join(File.separator, "src", "main", "java"), String.join(File.separator, "src", "test", "java"));
+		logger.log(Level.INFO, bugId + " writing label");
 		writer.write();
+		logger.log(Level.INFO, bugId + " done writing label");
 	}
 	
 	private String getBugPath() {
@@ -68,5 +71,10 @@ public class LabelRunner implements Runnable {
 	private boolean fileExists(String path) {
 		File file = new File(path);
 		return file.exists();
+	}
+	
+	public boolean isDone() {
+		String pathToLabelFile = getPathToLabelFile();
+		return fileExists(pathToLabelFile);
 	}
 }
