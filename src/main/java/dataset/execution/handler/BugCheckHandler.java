@@ -8,6 +8,7 @@ public class BugCheckHandler extends Handler {
 
 	private final LabelRunner labelRunner;
 	private final TraceCreator traceCreator;
+	
 	public BugCheckHandler(Handler next, String repositoryPath, String projectName, int bugId) {
 		super(next);
 		traceCreator = new TraceCreator(repositoryPath, projectName, bugId);

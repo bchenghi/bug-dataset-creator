@@ -1,5 +1,6 @@
 package dataset.bug.minimize;
 
+import dataset.bug.Log;
 import dataset.bug.minimize.diff.DiffParser;
 import dataset.bug.minimize.diff.GitWrapper;
 import dataset.bug.minimize.instruction.Instruction;
@@ -11,8 +12,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ProjectMinimizer {
+	private final Logger logger = Log.createLogger(ProjectMinimizer.class);
     public static final String METADATA_FILE_NAME = "metadata.json";
     public static final String METADATA_DIR = "metadata";
     private final String buggyProject;
@@ -33,9 +37,10 @@ public class ProjectMinimizer {
 
     public boolean minimize() {
         if (!(new File(workingProject).exists() && new File(buggyProject).exists())) {
-            System.out.println(workingProject + " " +  buggyProject + " does not exist");
+            logger.warning(workingProject + " " +  buggyProject + " does not exist");
             return false;
         }
+        logger.info("Minimizing " + buggyProject);
         List<String> diffResult = GitWrapper.getRawDiff(workingProject, buggyProject);
         List<Instruction> instructionList = DiffParser.parse(diffResult, workingProject, buggyProject);
         List<String> filesToAdd = new ArrayList<>();
@@ -50,9 +55,10 @@ public class ProjectMinimizer {
         try {
             FileUtils.deleteDirectory(new File(buggyProject));
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.WARNING, e.getMessage(), e);
             return false;
         }
+        logger.info("Finished minimizing " + buggyProject);
         return true;
     }
 
@@ -81,18 +87,20 @@ public class ProjectMinimizer {
         try {
             metadata = MetadataParser.parse(metadataPath + File.separator + METADATA_FILE_NAME);
         } catch (RuntimeException e) {
-            e.printStackTrace();
+            logger.log(Level.WARNING, e.getMessage(), e);
             return false;
         }
         List<Instruction> instructionList = metadata.instructionList();
         try {
             FileUtils.copyDirectory(new File(workingProject), new File(buggyProject));
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.WARNING, e.getMessage(), e);
+            return false;
         }
         for (Instruction instruction : instructionList) {
             applyInstruction(instruction);
         }
+        logger.info("Finished maximizing " + buggyProject);
         return true;
     }
 
@@ -102,7 +110,7 @@ public class ProjectMinimizer {
        try {
            FileUtils.copyFile(new File(fileInMetaData), new File(destInBuggyTarget), false);
        } catch (IOException e) {
-           e.printStackTrace();
+           logger.log(Level.WARNING, e.getMessage(), e);
        }
     }
 }

@@ -1,11 +1,11 @@
 package dataset.trace;
 
 import java.io.File;
+import java.util.logging.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
-import dataset.bug.creator.MutationFrameworkDatasetCreator;
-import dataset.bug.minimize.ProjectMinimizer;
+import dataset.bug.Log;
 import dataset.bug.model.path.MutationFrameworkPathConfiguration;
 import dataset.bug.model.path.PathConfiguration;
 import dataset.bug.model.path.PathConfiguration.InstrumentatorFile;
@@ -14,6 +14,7 @@ import dataset.bug.model.project.MutationFrameworkDatasetProject;
 import jmutation.model.TestCase;
 
 public class TraceCreator implements Runnable {
+	private final Logger logger = Log.createLogger(TraceCreator.class);
     private final String projectName;
     private final int bugId;
     private final PathConfiguration pathConfig;
@@ -42,12 +43,16 @@ public class TraceCreator implements Runnable {
         		pathConfig.getInstrumentatorFilePath(projectName, bugId, InstrumentatorFile.PRECHECK),
         		pathConfig.getInstrumentatorFilePath(projectName, bugId, InstrumentatorFile.TRACE),
         		null);
+    	logger.info(bugId + " : start working trace collection");
         workingTraceCollector.call();
+    	logger.info(bugId + " : end working trace collection");
         TraceCollector buggyTraceCollector = new TraceCollector(buggyPath, testCase,
         		pathConfig.getInstrumentatorFilePath(projectName, bugId, InstrumentatorFile.BUGGY_PRECHECK),
         		pathConfig.getInstrumentatorFilePath(projectName, bugId, InstrumentatorFile.BUGGY_TRACE),
         		null);
+    	logger.info(bugId + " : start buggy trace collection");
         buggyTraceCollector.call();
+    	logger.info(bugId + " : end buggy trace collection");
     }
     
     public boolean isDone() {
@@ -64,7 +69,7 @@ public class TraceCreator implements Runnable {
     			return false;
     		}
     	}
-    	System.out.println(bugId + " is done");
+    	logger.info(bugId + " trace collection is done");
     	return true;
     }
 }

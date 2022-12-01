@@ -3,10 +3,7 @@ package dataset.execution.handler;
 import dataset.execution.Request;
 
 public abstract class Handler {
-	private final Handler nextHandler;
-	public Handler() {
-		nextHandler = new BaseHandler();
-	}
+	protected final Handler nextHandler;
 	
 	public Handler(Handler nextHandler) {
 		this.nextHandler = nextHandler;

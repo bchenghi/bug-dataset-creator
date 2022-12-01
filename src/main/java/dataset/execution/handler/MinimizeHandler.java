@@ -7,6 +7,7 @@ public class MinimizeHandler extends Handler {
     private final ProjectMinimizer minimizer;
     
     public MinimizeHandler(String repositoryPath, String projectName, int bugId) {
+		super(new BaseHandler());
         minimizer = MaximizeHandler.createMinimizer(repositoryPath, projectName, bugId);
     }
     

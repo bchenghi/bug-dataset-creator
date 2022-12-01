@@ -12,7 +12,7 @@ public class LabelHandler extends Handler {
 	}
 	
 	public LabelHandler(String repositoryPath, String projectName, int bugId) {
-		super();
+		super(new BaseHandler());
 		labelRunner = new LabelRunner(repositoryPath, projectName, bugId);
 	}
 	

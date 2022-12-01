@@ -3,7 +3,14 @@ package dataset.execution.handler;
 import dataset.execution.Request;
 
 public class BaseHandler extends Handler {
+	public BaseHandler() {
+		this(null);
+	}
 	
+	public BaseHandler(Handler nextHandler) {
+		super(null);
+	}
+
 	@Override
 	public void handle(Request request) {
 		// NOP
