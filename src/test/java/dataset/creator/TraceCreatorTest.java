@@ -24,7 +24,8 @@ public class TraceCreatorTest {
 	static {
 		PathConfiguration pathConfig = new MutationFrameworkPathConfiguration(REPO_PATH);
     	for (InstrumentatorFile fileType : InstrumentatorFile.values()) {
-    		if (fileType == InstrumentatorFile.BUGGY_PRECHECK || fileType == InstrumentatorFile.PRECHECK) continue;
+    		if (fileType == InstrumentatorFile.BUGGY_PRECHECK || fileType == InstrumentatorFile.PRECHECK || 
+    				fileType == InstrumentatorFile.BUGGY_TRACE_W_ASSERTS || fileType == InstrumentatorFile.TRACE_W_ASSERTS) continue;
     		TRACE_FILE_PATHS.add(pathConfig.getInstrumentatorFilePath(PROJECT_NAME, Integer.toString(1), fileType));
     	}
 	}
@@ -45,5 +46,11 @@ public class TraceCreatorTest {
     		File file = new File(filePath);
     		assertTrue(file.exists());
     	}
+	}
+	
+	@Test
+	public void isDone_tracesArePresent_returnsTrue() throws IOException {
+		TraceCreator creator = new TraceCreator(new File(REPO_PATH).getCanonicalPath(), PROJECT_NAME, 2);
+		assertTrue(creator.isDone());
 	}
 }

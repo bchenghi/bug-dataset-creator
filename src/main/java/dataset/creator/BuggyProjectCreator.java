@@ -86,7 +86,6 @@ public class BuggyProjectCreator implements Runnable {
             createFile(buggyProject.testCase().toString(), mutatedProjPath.toString(), "testcase.txt");
             createFile(buggyProject.command().toString(), mutatedProjPath.toString(), "rootcause.txt");
         	print(currBugId, "Created testcase and rootcause files. Minimizing.");
-            //runTraceCollection();
             if (!minimize(mutatedProjPath.toString(), currBugId)) {
                 try {
                 	print(currBugId, "Minimize failed. Deleting.");
@@ -125,28 +124,6 @@ public class BuggyProjectCreator implements Runnable {
                 e.printStackTrace();
             }
         }
-    }
-
-    private void runTraceCollection() {
-        // Get the path to buggy
-        // Get names of the trace files
-        PathConfiguration pathConfiguration = new MutationFrameworkPathConfiguration(repositoryPath);
-        String buggyPath = pathConfiguration.getBuggyPath(buggyProject.projectName(), Integer.toString(bugId));
-        String workingPath = pathConfiguration.getFixPath(buggyProject.projectName(), Integer.toString(bugId));
-        String bugPath = pathConfiguration.getBugPath(buggyProject.projectName(), Integer.toString(bugId));
-        // Get test case file
-        DatasetProject project = new MutationFrameworkDatasetProject(buggyPath);
-        TestCase testCase = project.getFailingTests().get(0);
-        TraceCollector workingTraceCollector = new TraceCollector(workingPath, testCase,
-                bugPath + File.separator + DumpFilePathConfig.DEFAULT_PRECHECK_FILE,
-                bugPath + File.separator + DumpFilePathConfig.DEFAULT_TRACE_FILE,
-                bugPath + File.separator + DumpFilePathConfig.DEFAULT_TRACE_W_ASSERTS_FILE);
-        workingTraceCollector.call();
-        TraceCollector buggyTraceCollector = new TraceCollector(workingPath, testCase,
-                bugPath + File.separator + DumpFilePathConfig.DEFAULT_BUGGY_PRECHECK_FILE,
-                bugPath + File.separator + DumpFilePathConfig.DEFAULT_BUGGY_TRACE_FILE,
-                bugPath + File.separator + DumpFilePathConfig.DEFAULT_BUGGY_TRACE_W_ASSERTS_FILE);
-        buggyTraceCollector.call();
     }
 
     private boolean minimize(String buggyProjectPath, int bugId) {

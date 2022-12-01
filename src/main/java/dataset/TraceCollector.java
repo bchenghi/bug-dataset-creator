@@ -55,7 +55,10 @@ public class TraceCollector implements Callable<ExecutionResult> {
         }
         updatedMicrobatConfig = microbatConfig.setDumpFilePath(traceDumpFilePath).setExpectedSteps(precheckExecutionResult.getTotalSteps());
         projectExecutor.setMicrobatConfig(updatedMicrobatConfig);
-        projectExecutor.exec(testCase, false);
+        ExecutionResult result = projectExecutor.exec(testCase, false);
+        if (traceWithAssertsDumpFilePath == null) {
+        	return result;
+        }
         MicrobatConfig includeAssertionsMutationMicrobatConfig = addAssertionsToMicrobatConfig(updatedMicrobatConfig);
         includeAssertionsMutationMicrobatConfig =
                 includeAssertionsMutationMicrobatConfig.setDumpFilePath(traceWithAssertsDumpFilePath);

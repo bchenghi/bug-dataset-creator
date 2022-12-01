@@ -72,12 +72,12 @@ public class TraceCreator implements Runnable {
         TraceCollector workingTraceCollector = new TraceCollector(workingPath, testCase,
         		pathConfig.getInstrumentatorFilePath(projectName, bugId, InstrumentatorFile.PRECHECK),
         		pathConfig.getInstrumentatorFilePath(projectName, bugId, InstrumentatorFile.TRACE),
-        		pathConfig.getInstrumentatorFilePath(projectName, bugId, InstrumentatorFile.TRACE_W_ASSERTS));
+        		null);
         workingTraceCollector.call();
         TraceCollector buggyTraceCollector = new TraceCollector(buggyPath, testCase,
         		pathConfig.getInstrumentatorFilePath(projectName, bugId, InstrumentatorFile.BUGGY_PRECHECK),
         		pathConfig.getInstrumentatorFilePath(projectName, bugId, InstrumentatorFile.BUGGY_TRACE),
-        		pathConfig.getInstrumentatorFilePath(projectName, bugId, InstrumentatorFile.BUGGY_TRACE_W_ASSERTS));
+        		null);
         buggyTraceCollector.call();
     }
     
@@ -85,6 +85,8 @@ public class TraceCreator implements Runnable {
     	String bugId = Integer.toString(this.bugId);
     	List<String> filePaths = new ArrayList<>();
     	for (InstrumentatorFile fileType : InstrumentatorFile.values()) {
+    		if (fileType.equals(InstrumentatorFile.PRECHECK) || fileType.equals(InstrumentatorFile.BUGGY_PRECHECK) ||
+    				fileType.equals(InstrumentatorFile.BUGGY_TRACE_W_ASSERTS) || fileType.equals(InstrumentatorFile.TRACE_W_ASSERTS)) continue;
     		filePaths.add(pathConfig.getInstrumentatorFilePath(projectName, bugId, fileType));
     	}
     	for (String filePath : filePaths) {

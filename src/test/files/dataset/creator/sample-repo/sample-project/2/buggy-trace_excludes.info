@@ -946,8 +946,8 @@ sun.reflect.generics.visitor.TypeTreeVisitor
 org.junit.Test
 java.lang.reflect.GenericArrayType
 sun.reflect.annotation.AnnotationType$1
-sun.reflect.annotation.ExceptionProxy
 org.junit.Test$None
+sun.reflect.annotation.ExceptionProxy
 java.lang.annotation.Retention
 java.lang.annotation.Inherited
 java.lang.annotation.RetentionPolicy
