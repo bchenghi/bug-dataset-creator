@@ -49,9 +49,11 @@ public class ProjectMinimizer {
                 filesToAdd.add(instruction.pathInTarget());
             }
         }
-        copyOverFiles(filesToAdd, metadataPath);
-        Metadata metadata = generateMetadata(instructionList);
-        MetadataWriter.write(metadataPath + File.separator + METADATA_FILE_NAME, metadata);
+        if (!metaDataExists()) {
+	        copyOverFiles(filesToAdd, metadataPath);
+	        Metadata metadata = generateMetadata(instructionList);
+	        MetadataWriter.write(metadataPath + File.separator + METADATA_FILE_NAME, metadata);
+        }
         try {
             FileUtils.deleteDirectory(new File(buggyProject));
         } catch (IOException e) {
@@ -112,5 +114,9 @@ public class ProjectMinimizer {
        } catch (IOException e) {
            logger.log(Level.WARNING, e.getMessage(), e);
        }
+    }
+    
+    public boolean metaDataExists() {
+    	return new File(metadataPath).exists();
     }
 }

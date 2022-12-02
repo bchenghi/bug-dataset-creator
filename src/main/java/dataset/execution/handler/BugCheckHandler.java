@@ -15,6 +15,12 @@ public class BugCheckHandler extends Handler {
 		labelRunner = new LabelRunner(repositoryPath, projectName, bugId);
 	}
 	
+	public BugCheckHandler(String repositoryPath, String projectName, int bugId) {
+		super(new BaseHandler());
+		traceCreator = new TraceCreator(repositoryPath, projectName, bugId);
+		labelRunner = new LabelRunner(repositoryPath, projectName, bugId);
+	}
+	
 	@Override
 	public boolean individualHandler(Request request) {
 		// Check if label + traces are present.
