@@ -4,10 +4,10 @@ import jmutation.model.TestCase;
 
 import java.util.List;
 
-abstract public class DatasetProject {
+public abstract class DatasetProject {
     protected String projectPath;
-    public DatasetProject(String projectPath) {
+    protected DatasetProject(String projectPath) {
         this.projectPath = projectPath;
     }
-    abstract public List<TestCase> getFailingTests();
+    public abstract List<TestCase> getFailingTests();
 }

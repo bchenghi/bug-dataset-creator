@@ -18,18 +18,18 @@ public class Main {
     public static void main(String[] args) throws InterruptedException {
         String repoPath = "C:\\Users\\bchenghi\\Desktop";
         String projectName = "math_70";
-//        int numOfCores = Runtime.getRuntime().availableProcessors() - 1;
-//        ExecutorService executorService = Executors.newFixedThreadPool(numOfCores);
-//        for (int bugId = 1; bugId <= 812; bugId++) {
-//            minimize(repoPath, projectName, bugId);
-//            maximise(repoPath, projectName, bugId);
-//            TraceCollector traceCollector = updateExisting(repoPath, projectName, bugId);
-//            TraceCollector traceCollector1 = updateExisting1(repoPath, projectName, bugId);
-//            if (traceCollector != null) executorService.submit(traceCollector);
-//            if (traceCollector1 != null) executorService.submit(traceCollector1);
-//        }
-//        executorService.shutdown();
-//        executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        //        int numOfCores = Runtime.getRuntime().availableProcessors() - 1;
+        //        ExecutorService executorService = Executors.newFixedThreadPool(numOfCores);
+        //        for (int bugId = 1; bugId <= 812; bugId++) {
+        //            minimize(repoPath, projectName, bugId);
+        //            maximise(repoPath, projectName, bugId);
+        //            TraceCollector traceCollector = updateExisting(repoPath, projectName, bugId);
+        //            TraceCollector traceCollector1 = updateExisting1(repoPath, projectName, bugId);
+        //            if (traceCollector != null) executorService.submit(traceCollector);
+        //            if (traceCollector1 != null) executorService.submit(traceCollector1);
+        //        }
+        //        executorService.shutdown();
+        //        executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         for (int bugId = 1; bugId <= 812; bugId++) {
             minimize(repoPath, projectName, bugId);
         }

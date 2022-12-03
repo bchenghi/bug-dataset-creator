@@ -16,7 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ProjectMinimizer {
-	private final Logger logger = Log.createLogger(ProjectMinimizer.class);
+    private final Logger logger = Log.createLogger(ProjectMinimizer.class);
     public static final String METADATA_FILE_NAME = "metadata.json";
     public static final String METADATA_DIR = "metadata";
     private final String buggyProject;
@@ -50,9 +50,9 @@ public class ProjectMinimizer {
             }
         }
         if (!metaDataExists()) {
-	        copyOverFiles(filesToAdd, metadataPath);
-	        Metadata metadata = generateMetadata(instructionList);
-	        MetadataWriter.write(metadataPath + File.separator + METADATA_FILE_NAME, metadata);
+            copyOverFiles(filesToAdd, metadataPath);
+            Metadata metadata = generateMetadata(instructionList);
+            MetadataWriter.write(metadataPath + File.separator + METADATA_FILE_NAME, metadata);
         }
         try {
             FileUtils.deleteDirectory(new File(buggyProject));
@@ -108,16 +108,16 @@ public class ProjectMinimizer {
     }
 
     private void applyInstruction(Instruction instruction) {
-       String fileInMetaData = metadataPath + File.separator + instruction.pathInMetadata();
-       String destInBuggyTarget = buggyProject + File.separator + instruction.pathInTarget();
-       try {
-           FileUtils.copyFile(new File(fileInMetaData), new File(destInBuggyTarget), false);
-       } catch (IOException e) {
-           logger.log(Level.WARNING, e.getMessage(), e);
-       }
+        String fileInMetaData = metadataPath + File.separator + instruction.pathInMetadata();
+        String destInBuggyTarget = buggyProject + File.separator + instruction.pathInTarget();
+        try {
+            FileUtils.copyFile(new File(fileInMetaData), new File(destInBuggyTarget), false);
+        } catch (IOException e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
+        }
     }
-    
+
     public boolean metaDataExists() {
-    	return new File(metadataPath).exists();
+        return new File(metadataPath).exists();
     }
 }

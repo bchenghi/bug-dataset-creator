@@ -14,7 +14,7 @@ import dataset.bug.model.project.MutationFrameworkDatasetProject;
 import jmutation.model.TestCase;
 
 public class TraceCreator implements Runnable {
-	private final Logger logger = Log.createLogger(TraceCreator.class);
+    private final Logger logger = Log.createLogger(TraceCreator.class);
     private final String projectName;
     private final int bugId;
     private final PathConfiguration pathConfig;
@@ -24,12 +24,12 @@ public class TraceCreator implements Runnable {
         this.bugId = bugId;
         pathConfig = new MutationFrameworkPathConfiguration(repositoryPath);
     }
-    
+
     public void run() {
-    	if (isDone()) return;
-    	runTraceCollection();
+        if (isDone()) return;
+        runTraceCollection();
     }
-    
+
     private void runTraceCollection() {
         // Get the path to buggy
         // Get names of the trace files
@@ -38,37 +38,37 @@ public class TraceCreator implements Runnable {
         // Get test case file
         DatasetProject project = new MutationFrameworkDatasetProject(buggyPath);
         TestCase testCase = project.getFailingTests().get(0);
-    	String bugId = Integer.toString(this.bugId);
+        String bugId = Integer.toString(this.bugId);
         TraceCollector workingTraceCollector = new TraceCollector(workingPath, testCase,
-        		pathConfig.getInstrumentatorFilePath(projectName, bugId, InstrumentatorFile.PRECHECK),
-        		pathConfig.getInstrumentatorFilePath(projectName, bugId, InstrumentatorFile.TRACE),
-        		null);
-    	logger.info(bugId + " : start working trace collection");
+                pathConfig.getInstrumentatorFilePath(projectName, bugId, InstrumentatorFile.PRECHECK),
+                pathConfig.getInstrumentatorFilePath(projectName, bugId, InstrumentatorFile.TRACE),
+                null);
+        logger.info(bugId + " : start working trace collection");
         workingTraceCollector.call();
-    	logger.info(bugId + " : end working trace collection");
+        logger.info(bugId + " : end working trace collection");
         TraceCollector buggyTraceCollector = new TraceCollector(buggyPath, testCase,
-        		pathConfig.getInstrumentatorFilePath(projectName, bugId, InstrumentatorFile.BUGGY_PRECHECK),
-        		pathConfig.getInstrumentatorFilePath(projectName, bugId, InstrumentatorFile.BUGGY_TRACE),
-        		null);
-    	logger.info(bugId + " : start buggy trace collection");
+                pathConfig.getInstrumentatorFilePath(projectName, bugId, InstrumentatorFile.BUGGY_PRECHECK),
+                pathConfig.getInstrumentatorFilePath(projectName, bugId, InstrumentatorFile.BUGGY_TRACE),
+                null);
+        logger.info(bugId + " : start buggy trace collection");
         buggyTraceCollector.call();
-    	logger.info(bugId + " : end buggy trace collection");
+        logger.info(bugId + " : end buggy trace collection");
     }
-    
+
     public boolean isDone() {
-    	String bugId = Integer.toString(this.bugId);
-    	List<String> filePaths = new ArrayList<>();
-    	for (InstrumentatorFile fileType : InstrumentatorFile.values()) {
-    		if (fileType.equals(InstrumentatorFile.PRECHECK) || fileType.equals(InstrumentatorFile.BUGGY_PRECHECK) ||
-    				fileType.equals(InstrumentatorFile.BUGGY_TRACE_W_ASSERTS) || fileType.equals(InstrumentatorFile.TRACE_W_ASSERTS)) continue;
-    		filePaths.add(pathConfig.getInstrumentatorFilePath(projectName, bugId, fileType));
-    	}
-    	for (String filePath : filePaths) {
-    		File file = new File(filePath);
-    		if (!file.exists()) {
-    			return false;
-    		}
-    	}
-    	return true;
+        String bugId = Integer.toString(this.bugId);
+        List<String> filePaths = new ArrayList<>();
+        for (InstrumentatorFile fileType : InstrumentatorFile.values()) {
+            if (fileType.equals(InstrumentatorFile.PRECHECK) || fileType.equals(InstrumentatorFile.BUGGY_PRECHECK) ||
+                    fileType.equals(InstrumentatorFile.BUGGY_TRACE_W_ASSERTS) || fileType.equals(InstrumentatorFile.TRACE_W_ASSERTS)) continue;
+            filePaths.add(pathConfig.getInstrumentatorFilePath(projectName, bugId, fileType));
+        }
+        for (String filePath : filePaths) {
+            File file = new File(filePath);
+            if (!file.exists()) {
+                return false;
+            }
+        }
+        return true;
     }
 }

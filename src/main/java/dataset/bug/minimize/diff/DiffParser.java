@@ -42,12 +42,12 @@ public class DiffParser {
 
     private static Instruction generateInstructionFromFilePair(InstructionType type, FilePair filePair) {
         switch (type) {
-            case ADD:
-                return new Instruction(type, filePair.buggyFile, filePair.buggyFile);
-            case DELETE:
-                return new Instruction(type, null, filePair.workingFile);
-            default:
-                return null;
+        case ADD:
+            return new Instruction(type, filePair.buggyFile, filePair.buggyFile);
+        case DELETE:
+            return new Instruction(type, null, filePair.workingFile);
+        default:
+            return null;
         }
     }
 

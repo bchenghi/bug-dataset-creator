@@ -13,68 +13,68 @@ import microbat.instrumentation.output.RunningInfo;
 import microbat.model.trace.Trace;
 
 public class LabelRunner implements Runnable {
-	private static final Logger logger = Log.createLogger(LabelRunner.class);
-	private final String projectName;
-	private final String bugId;
-	MutationFrameworkPathConfiguration pathConfig;
-	
-	public LabelRunner(String repoPath, String projectName, int bugId) {
-		this.projectName = projectName;
-		this.bugId = Integer.toString(bugId); 
-		pathConfig = new MutationFrameworkPathConfiguration(repoPath);
-	}
-	
-	public void run() {
-		if (isDone()) return;
-		String pathToWorkingTrace = getPathToTrace(true);
-		if (!fileExists(pathToWorkingTrace)) {
-			logger.log(Level.INFO, pathToWorkingTrace +" does not exist");
-			return;
-		}
-		String pathToBuggyTrace = getPathToTrace(false);		
-		if (!fileExists(pathToBuggyTrace)) {
-			logger.log(Level.INFO, pathToBuggyTrace +" does not exist");
-			return;
-		}
-		Trace workingTrace = getTrace(pathToWorkingTrace);
-		Trace buggyTrace = getTrace(pathToBuggyTrace);
-		String pathToLabelFile = getPathToLabelFile();
-		LabelFileWriter writer = new LabelFileWriter(pathToLabelFile, workingTrace, 
-				buggyTrace, pathConfig.getFixPath(projectName, bugId), pathConfig.getBuggyPath(projectName, bugId), 
-				String.join(File.separator, "src", "main", "java"), String.join(File.separator, "src", "test", "java"));
-		logger.log(Level.INFO, bugId + " writing label");
-		writer.write();
-		logger.log(Level.INFO, bugId + " done writing label");
-	}
-	
-	private String getBugPath() {
-		return pathConfig.getBugPath(projectName, bugId);
-	}
+    private static final Logger logger = Log.createLogger(LabelRunner.class);
+    private final String projectName;
+    private final String bugId;
+    MutationFrameworkPathConfiguration pathConfig;
 
-	private String getPathToTrace(boolean isWorkingTrace) {
-		String bugPath = getBugPath();
-		if (isWorkingTrace) {
-			return String.join(File.separator, bugPath, DumpFilePathConfig.DEFAULT_TRACE_FILE);
-		}
-		return String.join(File.separator, bugPath, DumpFilePathConfig.DEFAULT_BUGGY_TRACE_FILE);
-	}
-	
-	private String getPathToLabelFile() {
-		return pathConfig.getLabelPath(projectName, bugId);
-	}
-	
-	private Trace getTrace(String path) {
-		RunningInfo runningInfo = RunningInfo.readFromFile(path);
-		return runningInfo.getMainTrace();
-	}
-	
-	private boolean fileExists(String path) {
-		File file = new File(path);
-		return file.exists();
-	}
-	
-	public boolean isDone() {
-		String pathToLabelFile = getPathToLabelFile();
-		return fileExists(pathToLabelFile);
-	}
+    public LabelRunner(String repoPath, String projectName, int bugId) {
+        this.projectName = projectName;
+        this.bugId = Integer.toString(bugId); 
+        pathConfig = new MutationFrameworkPathConfiguration(repoPath);
+    }
+
+    public void run() {
+        if (isDone()) return;
+        String pathToWorkingTrace = getPathToTrace(true);
+        if (!fileExists(pathToWorkingTrace)) {
+            logger.log(Level.INFO, pathToWorkingTrace +" does not exist");
+            return;
+        }
+        String pathToBuggyTrace = getPathToTrace(false);		
+        if (!fileExists(pathToBuggyTrace)) {
+            logger.log(Level.INFO, pathToBuggyTrace +" does not exist");
+            return;
+        }
+        Trace workingTrace = getTrace(pathToWorkingTrace);
+        Trace buggyTrace = getTrace(pathToBuggyTrace);
+        String pathToLabelFile = getPathToLabelFile();
+        LabelFileWriter writer = new LabelFileWriter(pathToLabelFile, workingTrace, 
+                buggyTrace, pathConfig.getFixPath(projectName, bugId), pathConfig.getBuggyPath(projectName, bugId), 
+                String.join(File.separator, "src", "main", "java"), String.join(File.separator, "src", "test", "java"));
+        logger.log(Level.INFO, bugId + " writing label");
+        writer.write();
+        logger.log(Level.INFO, bugId + " done writing label");
+    }
+
+    private String getBugPath() {
+        return pathConfig.getBugPath(projectName, bugId);
+    }
+
+    private String getPathToTrace(boolean isWorkingTrace) {
+        String bugPath = getBugPath();
+        if (isWorkingTrace) {
+            return String.join(File.separator, bugPath, DumpFilePathConfig.DEFAULT_TRACE_FILE);
+        }
+        return String.join(File.separator, bugPath, DumpFilePathConfig.DEFAULT_BUGGY_TRACE_FILE);
+    }
+
+    private String getPathToLabelFile() {
+        return pathConfig.getLabelPath(projectName, bugId);
+    }
+
+    private Trace getTrace(String path) {
+        RunningInfo runningInfo = RunningInfo.readFromFile(path);
+        return runningInfo.getMainTrace();
+    }
+
+    private boolean fileExists(String path) {
+        File file = new File(path);
+        return file.exists();
+    }
+
+    public boolean isDone() {
+        String pathToLabelFile = getPathToLabelFile();
+        return fileExists(pathToLabelFile);
+    }
 }

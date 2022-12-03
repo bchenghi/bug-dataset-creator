@@ -3,22 +3,22 @@ package dataset.execution.handler;
 import dataset.execution.Request;
 
 public class BaseHandler extends Handler {
-	public BaseHandler() {
-		this(null);
-	}
-	
-	public BaseHandler(Handler nextHandler) {
-		super(null);
-	}
+    public BaseHandler() {
+        this(null);
+    }
 
-	@Override
-	public void handle(Request request) {
-		// NOP
-	}
-	
-	@Override
-	public boolean individualHandler(Request request) {
-		return false;
-	}
+    public BaseHandler(Handler nextHandler) {
+        super(null);
+    }
+
+    @Override
+    public void handle(Request request) {
+        // NOP
+    }
+
+    @Override
+    public boolean individualHandler(Request request) {
+        return false;
+    }
 
 }

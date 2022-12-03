@@ -15,8 +15,8 @@ import static jmutation.constants.ResourcesPath.DEFAULT_DROP_INS_DIR;
 import static jmutation.constants.ResourcesPath.DEFAULT_RESOURCES_PATH;
 
 public class TraceCollector implements Callable<ExecutionResult> {
-    private static String DROP_INS_DIR = String.join(File.separator, DEFAULT_RESOURCES_PATH, DEFAULT_DROP_INS_DIR);
-    private static String MICROBAT_CONFIG_PATH = String.join(File.separator, DEFAULT_RESOURCES_PATH, "microbatConfig.json");
+    private static final String DROP_INS_DIR = String.join(File.separator, DEFAULT_RESOURCES_PATH, DEFAULT_DROP_INS_DIR);
+    private static final String MICROBAT_CONFIG_PATH = String.join(File.separator, DEFAULT_RESOURCES_PATH, "microbatConfig.json");
     private TestCase testCase;
     private String precheckDumpFilePath;
     private String traceDumpFilePath;
@@ -26,7 +26,7 @@ public class TraceCollector implements Callable<ExecutionResult> {
 
 
     public TraceCollector(String projectPath, TestCase testCase, String precheckDumpFilePath, String traceDumpFilePath,
-                          String traceWithAssertsDumpFilePath) {
+            String traceWithAssertsDumpFilePath) {
         microbatConfig = MicrobatConfig.parse(MICROBAT_CONFIG_PATH, projectPath);
         projectConfig = new ProjectConfig(projectPath, DROP_INS_DIR);
         this.testCase = testCase;
@@ -36,7 +36,7 @@ public class TraceCollector implements Callable<ExecutionResult> {
     }
 
     public TraceCollector(ProjectConfig projectConfig, TestCase testCase, String precheckDumpFilePath,
-                          String traceDumpFilePath, String traceWithAssertsDumpFilePath) {
+            String traceDumpFilePath, String traceWithAssertsDumpFilePath) {
         microbatConfig = MicrobatConfig.defaultConfig(projectConfig.getProjectPath());
         this.projectConfig = projectConfig;
         this.testCase = testCase;
@@ -57,7 +57,7 @@ public class TraceCollector implements Callable<ExecutionResult> {
         projectExecutor.setMicrobatConfig(updatedMicrobatConfig);
         ExecutionResult result = projectExecutor.exec(testCase, false);
         if (traceWithAssertsDumpFilePath == null) {
-        	return result;
+            return result;
         }
         MicrobatConfig includeAssertionsMutationMicrobatConfig = addAssertionsToMicrobatConfig(updatedMicrobatConfig);
         includeAssertionsMutationMicrobatConfig =

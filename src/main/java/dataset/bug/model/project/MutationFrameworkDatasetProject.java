@@ -9,11 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MutationFrameworkDatasetProject extends DatasetProject {
-    private final String TEST_CASE_FILE = "testcase.txt";
+    private static final String TEST_CASE_FILE = "testcase.txt";
     public MutationFrameworkDatasetProject(String projectPath) {
         super(projectPath);
     }
-    
+
     @Override
     public List<TestCase> getFailingTests() {
         String pathToTestCaseFile = projectPath.substring(0, projectPath.length() - 3) + TEST_CASE_FILE;
@@ -25,7 +25,7 @@ public class MutationFrameworkDatasetProject extends DatasetProject {
             TestCase testCase = new TestCase("signature", 0, 0, testMethod, testClass, null);
             result.add(testCase);
         } catch (IOException e) {
-        	e.printStackTrace();
+            e.printStackTrace();
         }
         return result;
     }

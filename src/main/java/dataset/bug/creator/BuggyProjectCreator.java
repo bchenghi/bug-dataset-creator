@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 import static dataset.bug.creator.MutationFrameworkDatasetCreator.bugId;
 
 public class BuggyProjectCreator implements Runnable {
-	private static final Logger logger = Log.createLogger(BuggyProjectCreator.class);
+    private static final Logger logger = Log.createLogger(BuggyProjectCreator.class);
     private static final Object lock = new Object();
     private static final Object storageFileLock = new Object();
     private final String repositoryPath;
@@ -70,45 +70,45 @@ public class BuggyProjectCreator implements Runnable {
         mutatedProjPath.delete(mutatedBugPathLen, mutatedBugPathLen + 3);
         configuration.setTestCase(buggyProject.testCase());
         try {
-        	log(currBugId, "Start mutating");
+            log(currBugId, "Start mutating");
             MutationResult result = mutationFramework.mutate(buggyProject.command());
-        	log(currBugId, "Finish mutating");
+            log(currBugId, "Finish mutating");
             if (result.getMutatedPrecheckExecutionResult() == null || result.getMutatedPrecheckExecutionResult().testCasePassed()) {
                 try {
-                	log(currBugId, "Test case passed or precheck is null, deleting", Level.WARNING);
+                    log(currBugId, "Test case passed or precheck is null, deleting", Level.WARNING);
                     FileUtils.deleteDirectory(new File(mutatedProjPath.toString()));
-                	log(currBugId, "Test case passed or precheck is null, deleted", Level.WARNING);
+                    log(currBugId, "Test case passed or precheck is null, deleted", Level.WARNING);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
                 return;
             }
-        	log(currBugId, "Test case failed, creating testcase and rootcause files");
+            log(currBugId, "Test case failed, creating testcase and rootcause files");
             createFile(buggyProject.testCase().toString(), mutatedProjPath.toString(), "testcase.txt");
             createFile(buggyProject.command().toString(), mutatedProjPath.toString(), "rootcause.txt");
-        	log(currBugId, "Created testcase and rootcause files. Minimizing.");
+            log(currBugId, "Created testcase and rootcause files. Minimizing.");
             if (!minimize(mutatedProjPath.toString(), currBugId)) {
                 try {
-                	log(currBugId, "Minimize failed. Deleting.", Level.WARNING);
+                    log(currBugId, "Minimize failed. Deleting.", Level.WARNING);
                     FileUtils.deleteDirectory(new File(mutatedProjPath.toString()));
-                	log(currBugId, "Minimize failed. Deleted.", Level.WARNING);
+                    log(currBugId, "Minimize failed. Deleted.", Level.WARNING);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
                 return;
             }
-        	log(currBugId, "Finish minimizing, writing to storage file");
+            log(currBugId, "Finish minimizing, writing to storage file");
             writeToStorageFile();
-        	log(currBugId, "Written to storage file");
+            log(currBugId, "Written to storage file");
         } catch (RuntimeException e) {
             e.printStackTrace();
         }
-    	log(currBugId, "Done");
+        log(currBugId, "Done");
     }
 
     private int increaseAndGetBugId() {
         synchronized (lock) {
-        	logger.log(Level.INFO, Thread.currentThread().getName() + " : " + bugId);
+            logger.log(Level.INFO, Thread.currentThread().getName() + " : " + bugId);
             bugId++;
             return bugId;
         }
@@ -116,7 +116,7 @@ public class BuggyProjectCreator implements Runnable {
 
     private void writeToStorageFile() {
         synchronized (storageFileLock) {
-        	logger.log(Level.INFO, Thread.currentThread().getName() + " : writing to json file");
+            logger.log(Level.INFO, Thread.currentThread().getName() + " : writing to json file");
             JSONObject storedJSON = MutationFrameworkDatasetCreator.getStoredProjects(storageFilePath);
             storedJSON.put(buggyProject.key(), buggyProject.createJSONObject());
             try (FileWriter writer = new FileWriter(storageFilePath)) {
@@ -131,7 +131,7 @@ public class BuggyProjectCreator implements Runnable {
         ProjectMinimizer minimizer = createMinimizer(buggyProjectPath, bugId);
         return minimizer.minimize();
     }
-    
+
     private ProjectMinimizer createMinimizer(String buggyProjectPath, int bugId) {
         PathConfiguration pathConfiguration = new MutationFrameworkPathConfiguration(repositoryPath);
         String projectName = projectPath.substring(projectPath.lastIndexOf(File.separator) + 1);
@@ -142,12 +142,12 @@ public class BuggyProjectCreator implements Runnable {
                 String.join(File.separator, buggyProject.projectName(), MutationFrameworkDatasetCreator.WORKING_PROJECT_DIR),
                 metadataPath);
     }
-    
+
     private void log(int bugId, String msg) {
-    	logger.info(bugId + ": " + msg);
+        logger.info(bugId + ": " + msg);
     }    
-    
+
     private void log(int bugId, String msg, Level level) {
-    	logger.log(level, bugId + ": " + msg);
+        logger.log(level, bugId + ": " + msg);
     }
 }
