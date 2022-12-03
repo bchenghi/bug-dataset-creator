@@ -17,7 +17,7 @@ import dataset.bug.model.path.PathConfiguration.InstrumentatorFile;
 import dataset.trace.TraceCreator;
 
 class TraceCreatorTest {
-    public static final String TEST_FILES_PATH = String.join(File.separator, "src", "test", "files", "dataset", "creator");
+    public static final String TEST_FILES_PATH = String.join(File.separator, "src", "test", "files", "dataset", "bug", "creator");
     private static final String PROJECT_NAME = "sample-project";
     private static final String REPO_NAME = "sample-repo";
     private static final String REPO_PATH = String.join(File.separator, TEST_FILES_PATH, REPO_NAME);
