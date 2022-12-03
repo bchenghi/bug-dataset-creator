@@ -85,6 +85,7 @@ public class ProjectMinimizer {
     }
 
     public boolean maximise() {
+        logger.info("Maximizing " + buggyProject);
         Metadata metadata;
         try {
             metadata = MetadataParser.parse(metadataPath + File.separator + METADATA_FILE_NAME);
