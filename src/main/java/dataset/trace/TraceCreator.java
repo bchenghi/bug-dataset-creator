@@ -69,7 +69,6 @@ public class TraceCreator implements Runnable {
     			return false;
     		}
     	}
-    	logger.info(bugId + " trace collection is done");
     	return true;
     }
 }
