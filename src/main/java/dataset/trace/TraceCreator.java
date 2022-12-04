@@ -56,14 +56,16 @@ public class TraceCreator implements Runnable {
         TraceCollector workingTraceCollector = new TraceCollector(workingPath, testCase,
                 pathConfig.getInstrumentatorFilePath(projectName, bugId, InstrumentatorFile.PRECHECK),
                 pathConfig.getInstrumentatorFilePath(projectName, bugId, InstrumentatorFile.TRACE),
-                null);
+                null,
+                instrumentationTimeout);
         logger.info(bugId + " : start working trace collection");
         workingTraceCollector.call();
         logger.info(bugId + " : end working trace collection");
         TraceCollector buggyTraceCollector = new TraceCollector(buggyPath, testCase,
                 pathConfig.getInstrumentatorFilePath(projectName, bugId, InstrumentatorFile.BUGGY_PRECHECK),
                 pathConfig.getInstrumentatorFilePath(projectName, bugId, InstrumentatorFile.BUGGY_TRACE),
-                null);
+                null,
+                instrumentationTimeout);
         logger.info(bugId + " : start buggy trace collection");
         buggyTraceCollector.call();
         logger.info(bugId + " : end buggy trace collection");
