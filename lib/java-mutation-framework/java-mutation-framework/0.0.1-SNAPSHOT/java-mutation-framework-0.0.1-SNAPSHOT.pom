@@ -4,6 +4,6 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>java-mutation-framework</groupId>
   <artifactId>java-mutation-framework</artifactId>
-  <version>0.0.1</version>
+  <version>0.0.1-SNAPSHOT</version>
   <description>POM was created from install:install-file</description>
 </project>
