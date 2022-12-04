@@ -6,9 +6,9 @@ import dataset.trace.TraceCreator;
 public class TraceCollectionHandler extends Handler {
     private final TraceCreator traceCreator;
 
-    public TraceCollectionHandler(Handler next, String repoPath, String projectName, int bugId) {
+    public TraceCollectionHandler(Handler next, String repoPath, String projectName, int bugId, int timeout) {
         super(next);
-        traceCreator = new TraceCreator(repoPath, projectName, bugId);
+        traceCreator = new TraceCreator(repoPath, projectName, bugId, timeout);
     }
 
     @Override
