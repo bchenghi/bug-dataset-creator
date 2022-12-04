@@ -10,6 +10,7 @@ import jmutation.model.project.ProjectConfig;
 import java.io.File;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeoutException;
 
 import static jmutation.constants.ResourcesPath.DEFAULT_DROP_INS_DIR;
 import static jmutation.constants.ResourcesPath.DEFAULT_RESOURCES_PATH;
@@ -23,16 +24,23 @@ public class TraceCollector implements Callable<ExecutionResult> {
     private String traceWithAssertsDumpFilePath;
     private MicrobatConfig microbatConfig;
     private ProjectConfig projectConfig;
+    private int instrumentationTimeout;
 
 
     public TraceCollector(String projectPath, TestCase testCase, String precheckDumpFilePath, String traceDumpFilePath,
             String traceWithAssertsDumpFilePath) {
+        this(projectPath, testCase, precheckDumpFilePath, traceDumpFilePath, traceWithAssertsDumpFilePath, 0);
+    }
+
+    public TraceCollector(String projectPath, TestCase testCase, String precheckDumpFilePath, String traceDumpFilePath,
+                          String traceWithAssertsDumpFilePath, int timeout) {
         microbatConfig = MicrobatConfig.parse(MICROBAT_CONFIG_PATH, projectPath);
         projectConfig = new ProjectConfig(projectPath, DROP_INS_DIR);
         this.testCase = testCase;
         this.precheckDumpFilePath = precheckDumpFilePath;
         this.traceDumpFilePath = traceDumpFilePath;
         this.traceWithAssertsDumpFilePath = traceWithAssertsDumpFilePath;
+        this.instrumentationTimeout = timeout;
     }
 
     public TraceCollector(ProjectConfig projectConfig, TestCase testCase, String precheckDumpFilePath,
@@ -45,7 +53,7 @@ public class TraceCollector implements Callable<ExecutionResult> {
         this.traceWithAssertsDumpFilePath = traceWithAssertsDumpFilePath;
     }
 
-    public ExecutionResult call() {
+    public ExecutionResult call() throws TimeoutException {
         MicrobatConfig updatedMicrobatConfig = microbatConfig.setDumpFilePath(precheckDumpFilePath);
         ProjectExecutor projectExecutor = new ProjectExecutor(updatedMicrobatConfig, projectConfig);
         PrecheckExecutionResult precheckExecutionResult = projectExecutor.execPrecheck(testCase);
@@ -55,7 +63,7 @@ public class TraceCollector implements Callable<ExecutionResult> {
         }
         updatedMicrobatConfig = microbatConfig.setDumpFilePath(traceDumpFilePath).setExpectedSteps(precheckExecutionResult.getTotalSteps());
         projectExecutor.setMicrobatConfig(updatedMicrobatConfig);
-        ExecutionResult result = projectExecutor.exec(testCase, false);
+        ExecutionResult result = projectExecutor.exec(testCase, false, instrumentationTimeout);
         if (traceWithAssertsDumpFilePath == null) {
             return result;
         }

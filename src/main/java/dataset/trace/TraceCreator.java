@@ -1,6 +1,7 @@
 package dataset.trace;
 
 import java.io.File;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,19 +19,32 @@ public class TraceCreator implements Runnable {
     private final String projectName;
     private final int bugId;
     private final PathConfiguration pathConfig;
+    private final int instrumentationTimeout;
 
     public TraceCreator(String repositoryPath, String projectName, int bugId) {
         this.projectName = projectName;
         this.bugId = bugId;
         pathConfig = new MutationFrameworkPathConfiguration(repositoryPath);
+        instrumentationTimeout = 0;
+    }
+
+    public TraceCreator(String repositoryPath, String projectName, int bugId, int timeout) {
+        this.projectName = projectName;
+        this.bugId = bugId;
+        pathConfig = new MutationFrameworkPathConfiguration(repositoryPath);
+        instrumentationTimeout = timeout;
     }
 
     public void run() {
         if (isDone()) return;
-        runTraceCollection();
+        try {
+            runTraceCollection();
+        } catch (TimeoutException e) {
+            e.printStackTrace();
+        }
     }
 
-    private void runTraceCollection() {
+    private void runTraceCollection() throws TimeoutException {
         // Get the path to buggy
         // Get names of the trace files
         String buggyPath = pathConfig.getBuggyPath(projectName, Integer.toString(bugId));
