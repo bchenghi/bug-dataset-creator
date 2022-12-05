@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import dataset.execution.handler.BugCheckHandler;
 
 public class Main {
+    private static final int INSTRUMENTATION_TIMEOUT = 5;
     public static void main(String[] args) throws InterruptedException {
         final String projectName = "math_70";
         final String repoPath = "D:\\chenghin\\NUS";
@@ -22,7 +23,6 @@ public class Main {
         }
         //      	checkDone(repoPath, projectName, bugIds);
         runTraceAndLabelCollection(repoPath, projectName, bugIds);
-        //      	runForever();
     }
 
     private static void checkDone(String repoPath, String projectName, List<Integer> bugIds) {
@@ -40,20 +40,17 @@ public class Main {
     }
 
     private static void runTraceAndLabelCollection(String repoPath, String projectName, List<Integer> bugIds) throws InterruptedException {
-        int numOfCores = Runtime.getRuntime().availableProcessors() - 1;
+//        int numOfCores = Runtime.getRuntime().availableProcessors() - 1;
+        int numOfCores = 1;
         ExecutorService executor = Executors.newFixedThreadPool(numOfCores);
         Collections.shuffle(bugIds);
         System.out.println("Done with shuffling");
         for (int bugId : bugIds) {
             if (new File(repoPath + File.separator + projectName + File.separator + bugId).exists()) {
-                executor.submit(new Runner(repoPath, projectName, bugId));
+                executor.submit(new Runner(repoPath, projectName, bugId, INSTRUMENTATION_TIMEOUT));
             }
         }
         executor.shutdown();
         executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-    }
-
-    private static void runForever() {
-        while (true);
     }
 }
