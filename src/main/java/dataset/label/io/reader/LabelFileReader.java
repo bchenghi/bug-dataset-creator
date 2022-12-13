@@ -19,7 +19,7 @@ public class LabelFileReader {
         Map<String, Object> mapOfObjs = contents.toMap();
         Map<String, Double> result = new HashMap<>();
         for (Entry<String, Object> entry : mapOfObjs.entrySet()) {
-            result.put(entry.getKey(), (double) entry.getValue());
+            result.put(entry.getKey(), Double.valueOf(entry.getValue().toString()));
         }
         return result;
     }
