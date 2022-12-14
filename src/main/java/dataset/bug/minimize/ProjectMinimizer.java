@@ -26,7 +26,8 @@ public class ProjectMinimizer {
     private final String relativeMetadata;
     private final String metadataPath;
 
-    public ProjectMinimizer(String repoPath, String relativeBuggyProject, String relativeWorkingProject, String relativeMetadataPath) {
+    public ProjectMinimizer(String repoPath, String relativeBuggyProject, String relativeWorkingProject,
+            String relativeMetadataPath) {
         this.relativeWorkingProject = relativeWorkingProject;
         this.relativeBuggyProject = relativeBuggyProject;
         this.relativeMetadata = relativeMetadataPath;
@@ -36,24 +37,33 @@ public class ProjectMinimizer {
     }
 
     public boolean minimize() {
-        if (!(new File(workingProject).exists() && new File(buggyProject).exists())) {
-            logger.warning(workingProject + " " +  buggyProject + " does not exist");
+        if (!(new File(workingProject).exists())) {
+            logger.warning(workingProject + " does not exist");
             return false;
         }
-        logger.info("Minimizing " + buggyProject);
-        List<String> diffResult = GitWrapper.getRawDiff(workingProject, buggyProject);
-        List<Instruction> instructionList = DiffParser.parse(diffResult, workingProject, buggyProject);
-        List<String> filesToAdd = new ArrayList<>();
-        for (Instruction instruction : instructionList) {
-            if (instruction.instructionType().equals(InstructionType.ADD)) {
-                filesToAdd.add(instruction.pathInTarget());
-            }
+        
+        if (!(new File(buggyProject).exists())) {
+            logger.warning(buggyProject + " does not exist");
+            return false;
         }
+        
+        logger.info("Minimizing " + buggyProject);
         if (!metaDataExists()) {
+            logger.info("Generating metadata for " + buggyProject);
+            List<String> diffResult = GitWrapper.getRawDiff(workingProject, buggyProject);
+            List<Instruction> instructionList = DiffParser.parse(diffResult, workingProject, buggyProject);
+            List<String> filesToAdd = new ArrayList<>();
+            for (Instruction instruction : instructionList) {
+                if (instruction.instructionType().equals(InstructionType.ADD)) {
+                    filesToAdd.add(instruction.pathInTarget());
+                }
+            }
             copyOverFiles(filesToAdd, metadataPath);
             Metadata metadata = generateMetadata(instructionList);
             MetadataWriter.write(metadataPath + File.separator + METADATA_FILE_NAME, metadata);
         }
+        
+        logger.info("Deleting " + buggyProject);
         try {
             FileUtils.deleteDirectory(new File(buggyProject));
         } catch (IOException e) {
