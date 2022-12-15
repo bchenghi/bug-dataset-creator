@@ -21,7 +21,8 @@ public class Main {
         for (int bugId = startId; bugId <= endId; bugId++) {
             bugIds.add(bugId);
         }
-        //      	checkDone(repoPath, projectName, bugIds);
+//              	checkDone(repoPath, projectName, bugIds);
+//        minimizeAll(repoPath, projectName, bugIds);
         runTraceAndLabelCollection(repoPath, projectName, bugIds);
     }
 
@@ -52,5 +53,17 @@ public class Main {
         }
         executor.shutdown();
         executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+    }
+    
+    private static void minimizeAll(String repoPath, String projectName, List<Integer> bugIds) throws InterruptedException {
+      int numOfCores = Runtime.getRuntime().availableProcessors() - 1;
+      ExecutorService executor = Executors.newFixedThreadPool(numOfCores);
+      for (int bugId : bugIds) {
+          if (new File(repoPath + File.separator + projectName + File.separator + bugId).exists()) {
+              executor.submit(new MinimizeRunner(repoPath, projectName, bugId, INSTRUMENTATION_TIMEOUT));
+          }
+      }
+      executor.shutdown();
+      executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
     }
 }
