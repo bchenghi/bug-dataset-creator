@@ -20,6 +20,10 @@
         </repository>
     </repositories>
     <dependencies>
+        <!--
+        Command to update the jars in lib directory (in-project repository)
+        mvn install:install-file -Dfile=java-mutation-framework-0.0.1-SNAPSHOT-jar-with-dependencies.jar -DgroupId=java-mutation-framework -DartifactId=java-mutation-framework -Dversion=0.0.1-SNAPSHOT -Dpackaging=jar -DlocalRepositoryPath=lib -DcreateChecksum=true -U
+         -->
         <dependency>
             <groupId>java-mutation-framework</groupId>
             <artifactId>java-mutation-framework</artifactId>
