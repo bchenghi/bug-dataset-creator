@@ -9,6 +9,7 @@ import jmutation.MutationFramework;
 import jmutation.model.mutation.DumpFilePathConfig;
 import jmutation.model.mutation.MutationFrameworkConfig;
 import jmutation.model.mutation.MutationResult;
+import jmutation.model.mutation.MutationFrameworkConfig.MutationFrameworkConfigBuilder;
 import jmutation.mutation.heuristic.HeuristicMutator;
 
 import org.apache.commons.io.FileUtils;
@@ -49,26 +50,27 @@ public class BuggyProjectCreator implements Runnable {
     }
 
     public void run() {
-        MutationFrameworkConfig configuration = new MutationFrameworkConfig();
-        MutationFramework mutationFramework = new MutationFramework();
-        mutationFramework.setConfig(configuration);
-        configuration.setProjectPath(projectPath);
-        configuration.setMutator(new HeuristicMutator());
-
         StringBuilder mutatedProjPath = new StringBuilder(repositoryPath + File.separator +
                 buggyProject.projectName() + File.separator);
         int currBugId = increaseAndGetBugId();
         mutatedProjPath.append(currBugId);
         mutatedProjPath.append(File.separator);
-        configuration.getDumpFilePathConfig().setMutatedPrecheckFilePath(mutatedProjPath +
+        
+        MutationFrameworkConfigBuilder configBuilder = new MutationFrameworkConfigBuilder();        
+        configBuilder.setProjectPath(projectPath);
+        configBuilder.setMutator(new HeuristicMutator());
+        DumpFilePathConfig dumpFilePathConfig = new DumpFilePathConfig();
+        dumpFilePathConfig.setMutatedPrecheckFilePath(mutatedProjPath +
                 DumpFilePathConfig.DEFAULT_BUGGY_PRECHECK_FILE);
-        configuration.getDumpFilePathConfig().setMutatedTraceFilePath(mutatedProjPath +
+        dumpFilePathConfig.setMutatedTraceFilePath(mutatedProjPath +
                 DumpFilePathConfig.DEFAULT_BUGGY_TRACE_FILE);
         int mutatedBugPathLen = mutatedProjPath.length();
         mutatedProjPath.append(MutationFrameworkDatasetCreator.BUGGY_PROJECT_DIR);
-        configuration.setMutatedProjectPath(mutatedProjPath.toString());
+        configBuilder.setMutatedProjectPath(mutatedProjPath.toString());
         mutatedProjPath.delete(mutatedBugPathLen, mutatedBugPathLen + 3);
-        configuration.setTestCase(buggyProject.testCase());
+        configBuilder.setTestCase(buggyProject.testCase());
+        MutationFramework mutationFramework = new MutationFramework(configBuilder.build());
+
         try {
             log(currBugId, "Start mutating");
             MutationResult result = mutationFramework.mutate(buggyProject.command());

@@ -14,7 +14,8 @@ import org.apache.commons.io.FilenameUtils;
 import dataset.bug.Log;
 
 public class Zipper {
-    private final static Logger logger = Log.createLogger(Zipper.class);
+    private static final Logger logger = Log.createLogger(Zipper.class);
+    private Zipper() {}
     public static boolean zip(String path) {
         File file = new File(path);
         if (!file.exists()) {
@@ -23,22 +24,36 @@ public class Zipper {
         }
         
         try (FileOutputStream fos = new FileOutputStream(file.getParent() + File.separator + FilenameUtils.removeExtension(file.getName()) + ".zip"); 
-                ZipOutputStream zipOut = new ZipOutputStream(fos); 
-                FileInputStream fis = new FileInputStream(file)) {
-        ZipEntry zipEntry = new ZipEntry(file.getName());
-        zipOut.putNextEntry(zipEntry);
-
-        byte[] bytes = new byte[1024];
-        int length;
-        while((length = fis.read(bytes)) >= 0) {
-            zipOut.write(bytes, 0, length);
-        }
-
-        return true;
+                ZipOutputStream zipOut = new ZipOutputStream(fos)) {
+            return zip(file, ".", zipOut);
         } catch (IOException e) {
             e.printStackTrace();
             return false;
         }
+    }
+    
+    private static boolean zip(File file, String parentPath, ZipOutputStream zos) {
+        if (file.isDirectory()) {
+            File[] children = file.listFiles();
+            for (File child : children) {
+                zip(child, parentPath + File.separator + file.getName(), zos);
+            }
+        } else {
+            try (FileInputStream fis = new FileInputStream(file)) {
+                ZipEntry zipEntry = new ZipEntry(parentPath + File.separator + file.getName());
+                zos.putNextEntry(zipEntry);
+        
+                byte[] bytes = new byte[1024];
+                int length;
+                while((length = fis.read(bytes)) >= 0) {
+                    zos.write(bytes, 0, length);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+        return true;
     }
     
     public static boolean unzip(String path, String newPath) {
