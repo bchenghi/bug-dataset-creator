@@ -1,0 +1,1 @@
+{"metadataPath":"math_70\\1\\metadata","instructions":[{"pathInTarget":"src\\main\\java\\org\\apache\\commons\\math\\analysis\\BinaryFunction.java","instructionType":"ADD","pathInMetadata":"src\\main\\java\\org\\apache\\commons\\math\\analysis\\BinaryFunction.java"}],"fixedPath":"math_70\\fix","buggyPath":"math_70\\1\\bug"}

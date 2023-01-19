@@ -31,6 +31,8 @@ public class BuggyProjectCreator implements Runnable {
     private final String projectPath;
     private final String storageFilePath;
     private final BuggyProject buggyProject;
+    public static final String ROOTCAUSE_FILE_NAME = "rootcause.txt";
+    public static final String TESTCASE_FILE_NAME = "testcase.txt";
 
     public BuggyProjectCreator(String repositoryPath, String projectPath, BuggyProject buggyProject, String storageFilePath) {
         this.repositoryPath = repositoryPath;
@@ -86,8 +88,8 @@ public class BuggyProjectCreator implements Runnable {
                 return;
             }
             log(currBugId, "Test case failed, creating testcase and rootcause files");
-            createFile(buggyProject.testCase().toString(), mutatedProjPath.toString(), "testcase.txt");
-            createFile(buggyProject.command().toString(), mutatedProjPath.toString(), "rootcause.txt");
+            createFile(buggyProject.testCase().toString(), mutatedProjPath.toString(), TESTCASE_FILE_NAME);
+            createFile(buggyProject.command().toString(), mutatedProjPath.toString(), ROOTCAUSE_FILE_NAME);
             log(currBugId, "Created testcase and rootcause files. Minimizing.");
             if (!minimize(mutatedProjPath.toString(), currBugId)) {
                 try {

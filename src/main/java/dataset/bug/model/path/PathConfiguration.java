@@ -3,10 +3,14 @@ package dataset.bug.model.path;
 import jmutation.model.mutation.DumpFilePathConfig;
 
 public abstract class PathConfiguration {
-    protected String repoPath;
+    protected final String repoPath;
 
     protected PathConfiguration(String repoPath) {
         this.repoPath = repoPath;
+    }
+
+    public String getRepoPath() {
+        return repoPath;
     }
 
     public abstract String getBugPath(String projectName, String bugId);
