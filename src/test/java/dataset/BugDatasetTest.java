@@ -2,16 +2,20 @@ package dataset;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import dataset.BugDataset.BugData;
+import sav.common.core.SavRtException;
 import tregression.empiricalstudy.TestCase;
 
 class BugDatasetTest {
@@ -48,6 +52,32 @@ class BugDatasetTest {
         assertTrue(data.getWorkingTrace().size() > 0);
         assertEquals(3, data.getRootCauseNode());
         assertEquals(new TestCase("org.apache.commons.math.analysis.BinaryFunctionTest", "testAdd").getName(), data.getTestCase().getName());
+    }
+    
+    
+    @Test
+    void getData_bugDirMissingTraceFile_throwsFileNotFoundException() throws IOException {
+        BugDataset bugDataset = new BugDataset(REPO_PATH, PROJECT_NAME);
+        assertThrows(IOException.class, () -> bugDataset.getData(3));
+    }
+    
+    
+    @Test
+    void getData_bugDirMissingRootCauseFile_throwsFileNotFoundException() throws IOException {
+        BugDataset bugDataset = new BugDataset(REPO_PATH, PROJECT_NAME);
+        assertThrows(IOException.class, () -> bugDataset.getData(4));
+    }
+    
+    @Test
+    void exists_dirDoesNotExist_returnsFalse() throws IOException {
+        BugDataset bugDataset = new BugDataset(REPO_PATH, PROJECT_NAME);
+        assertFalse(bugDataset.exists(10));
+    }
+    
+    @Test
+    void exists_dirExists_returnsTrue() throws IOException {
+        BugDataset bugDataset = new BugDataset(REPO_PATH, PROJECT_NAME);
+        assertTrue(bugDataset.exists(1));
     }
     
     @AfterEach

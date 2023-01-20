@@ -3,6 +3,7 @@ package dataset;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,7 @@ import microbat.instrumentation.output.RunningInfo;
 import microbat.model.BreakPoint;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
+import sav.common.core.SavRtException;
 import tregression.empiricalstudy.TestCase;
 
 public class BugDataset {
@@ -27,6 +29,18 @@ public class BugDataset {
         super();
         this.projectName = projectName;
         pathConfig = new MutationFrameworkPathConfiguration(repoPath);
+    }
+    
+    public static void main(String[] args) throws IOException {
+        // Zips all the bugs in the repository
+        String repoPath = "D:\\chenghin\\NUS";
+        String projectName = "math_70";
+        int largestBugId = 17426;
+        BugDataset bugdataset = new BugDataset(repoPath, projectName);
+        
+        for (int i = 1; i <= largestBugId; i++) {
+            if (bugdataset.exists(i)) bugdataset.zip(i);
+        }
     }
     
     public boolean exists(int bugId) {
@@ -52,10 +66,20 @@ public class BugDataset {
         String pathToWorkingTrace = pathConfig.getInstrumentatorFilePath(projectName, bugIdStr, InstrumentatorFile.TRACE);
         String pathToRootCauseFile = String.join(File.separator, pathToBug, BuggyProjectCreator.ROOTCAUSE_FILE_NAME);
         String pathToTestCaseFile = String.join(File.separator, pathToBug, BuggyProjectCreator.TESTCASE_FILE_NAME);
-        Trace buggyTrace = RunningInfo.readFromFile(pathToBuggyTrace).getMainTrace();
-        Trace workingTrace = RunningInfo.readFromFile(pathToWorkingTrace).getMainTrace();
-        RootCause rootCause = new RootCause(Files.readString(Path.of(pathToRootCauseFile)));
-        return new BugData(getRootCauseNode(rootCause, workingTrace), buggyTrace, workingTrace, Files.readString(Path.of(pathToTestCaseFile)));
+        Trace buggyTrace;
+        Trace workingTrace;
+        try {
+            buggyTrace = RunningInfo.readFromFile(pathToBuggyTrace).getMainTrace();
+            workingTrace = RunningInfo.readFromFile(pathToWorkingTrace).getMainTrace();
+        } catch (SavRtException e) {
+            throw new IOException(e);
+        }
+        try {
+            RootCause rootCause = new RootCause(Files.readString(Path.of(pathToRootCauseFile)));
+            return new BugData(getRootCauseNode(rootCause, workingTrace), buggyTrace, workingTrace, Files.readString(Path.of(pathToTestCaseFile)));
+        } catch (NoSuchFileException e) {
+            throw new IOException(e);
+        }
     }
     
     private int getRootCauseNode(RootCause rootCause, Trace workingTrace) {
