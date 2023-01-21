@@ -37,6 +37,14 @@ class BugDatasetTest {
     }
     
     @Test
+    void zip_bugDirAndFullPathProvided_zipsCorrectly() throws IOException {
+        BugDataset bugDataset = new BugDataset(REPO_PATH + File.separator + PROJECT_NAME);
+        bugDataset.zip(1);
+        assertTrue(new File(ZIPPED_BUG_1).exists());
+        assertFalse(new File(UNZIPPED_BUG_1).exists());
+    }
+    
+    @Test
     void unzip_zippedBugDirProvided_unzipsCorrectly() throws IOException {
         BugDataset bugDataset = new BugDataset(REPO_PATH, PROJECT_NAME);
         bugDataset.unzip(2);
