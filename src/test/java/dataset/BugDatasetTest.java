@@ -7,7 +7,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
+import dataset.bug.minimize.ProjectMinimizer;
+import jmutation.utils.TraceHelper;
+import microbat.model.trace.Trace;
+import microbat.model.trace.TraceNode;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,8 +68,20 @@ class BugDatasetTest {
         assertEquals(expectedTestCase.testMethodName(), data.getTestCase().testMethodName());
         assertEquals(expectedTestCase.toString(), data.getTestCase().toString());
     }
-    
-    
+
+    // This one is a system test, we could put it in its own file
+    @Test
+    void setClassPathsToBreakpoints_traceFilesProvided_allTraceNodesGetsJavaPath() throws IOException {
+        BugDataset bugDataset = new BugDataset(REPO_PATH, PROJECT_NAME);
+        BugData data = bugDataset.getData(1);
+        ProjectMinimizer minimizer = bugDataset.createMinimizer(1);
+        minimizer.maximise();
+        TraceHelper.setClassPathsToBreakpoints(data.getBuggyTrace(), new File(data.getBuggyProjectPath()));
+        checkTraceHasJavaPaths(data.getBuggyTrace());
+        TraceHelper.setClassPathsToBreakpoints(data.getWorkingTrace(), new File(data.getWorkingProjectPath()));
+        checkTraceHasJavaPaths(data.getWorkingTrace());
+    }
+
     @Test
     void getData_bugDirMissingTraceFile_throwsFileNotFoundException() throws IOException {
         BugDataset bugDataset = new BugDataset(REPO_PATH, PROJECT_NAME);
@@ -113,6 +130,12 @@ class BugDatasetTest {
             FileUtils.copyDirectory(new File(originalPath), new File(REPO_PATH));
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+    private void checkTraceHasJavaPaths(Trace trace) {
+        List<TraceNode> executionList = trace.getExecutionList();
+        for (TraceNode node : executionList) {
+            assertFalse(node.getBreakPoint().getFullJavaFilePath().isEmpty());
         }
     }
 }

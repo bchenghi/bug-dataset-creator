@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import jmutation.utils.TraceHelper;
 import org.apache.commons.io.FileUtils;
 
 import dataset.bug.creator.BuggyProjectCreator;
@@ -69,7 +70,8 @@ public class BugDataset {
         int minBugId = 1;
         for (int i = 1; i <= largestBugId; i++) {
             if (new File(pathConfig.getBugPath(projectName, Integer.toString(i)) + ".zip").exists()) {
-                currSize += Files.size(Path.of(pathConfig.getBugPath(projectName, Integer.toString(i)) + ".zip")) / oneGb;
+                currSize += Files.size(Path.of(
+                        pathConfig.getBugPath(projectName, Integer.toString(i)) + ".zip")) / oneGb;
                 if (currSize >= gbSize) {
                     result.add(new int[] {minBugId, i});
                     currSize = 0;
@@ -106,8 +108,10 @@ public class BugDataset {
     public BugData getData(int bugId) throws IOException {
         String bugIdStr = Integer.toString(bugId);
         String pathToBug = pathConfig.getBugPath(projectName, bugIdStr);
-        String pathToBuggyTrace = pathConfig.getInstrumentatorFilePath(projectName, bugIdStr, InstrumentatorFile.BUGGY_TRACE);
-        String pathToWorkingTrace = pathConfig.getInstrumentatorFilePath(projectName, bugIdStr, InstrumentatorFile.TRACE);
+        String pathToBuggyTrace = pathConfig.getInstrumentatorFilePath(projectName,
+                bugIdStr, InstrumentatorFile.BUGGY_TRACE);
+        String pathToWorkingTrace = pathConfig.getInstrumentatorFilePath(projectName,
+                bugIdStr, InstrumentatorFile.TRACE);
         String pathToRootCauseFile = String.join(File.separator, pathToBug, BuggyProjectCreator.ROOTCAUSE_FILE_NAME);
         String pathToTestCaseFile = String.join(File.separator, pathToBug, BuggyProjectCreator.TESTCASE_FILE_NAME);
         Trace buggyTrace;
@@ -121,7 +125,9 @@ public class BugDataset {
         try {
             RootCause rootCause = new RootCause(Files.readString(Path.of(pathToRootCauseFile)));
             return new BugData(getRootCauseNode(rootCause, workingTrace), buggyTrace, workingTrace,
-                    Files.readString(Path.of(pathToTestCaseFile)), projectName);
+                    Files.readString(Path.of(pathToTestCaseFile)), projectName,
+                    pathConfig.getFixPath(projectName, bugIdStr),
+                    pathConfig.getBuggyPath(projectName, bugIdStr));
         } catch (NoSuchFileException e) {
             throw new IOException(e);
         }
@@ -133,7 +139,8 @@ public class BugDataset {
             BreakPoint breakPoint = traceNode.getBreakPoint();
             int lineNum = breakPoint.getLineNumber();
             String classCanonicalName = breakPoint.getDeclaringCompilationUnitName();
-            if (classCanonicalName.equals(rootCause.className) && lineNum <= rootCause.endLineNum && lineNum >= rootCause.startLineNum) {
+            if (classCanonicalName.equals(rootCause.className) && lineNum <= rootCause.endLineNum &&
+                    lineNum >= rootCause.startLineNum) {
                 return traceNode.getOrder();
             }
         }
@@ -152,14 +159,19 @@ public class BugDataset {
         private final Trace workingTrace;
         private final TestCase testCase;
         private final String projectName;
-        
-        public BugData(int rootCauseNode, Trace buggyTrace, Trace workingTrace, String testCase, String projectName) {
-            super();
+
+        private final String workingProjectPath;
+        private final String buggyProjectPath;
+
+        public BugData(int rootCauseNode, Trace buggyTrace, Trace workingTrace, String testCaseStr,
+                       String projectName, String workingProjectPath, String buggyProjectPath) {
             this.rootCauseNode = rootCauseNode;
             this.buggyTrace = buggyTrace;
             this.workingTrace = workingTrace;
-            this.testCase = formTestCase(testCase);
+            this.testCase = formTestCase(testCaseStr);
             this.projectName = projectName;
+            this.workingProjectPath = workingProjectPath;
+            this.buggyProjectPath = buggyProjectPath;
         }
 
         public int getRootCauseNode() {
@@ -180,6 +192,14 @@ public class BugDataset {
 
         public String getProjectName() {
             return projectName;
+        }
+
+        public String getWorkingProjectPath() {
+            return workingProjectPath;
+        }
+
+        public String getBuggyProjectPath() {
+            return buggyProjectPath;
         }
 
         private TestCase formTestCase(String testCaseStr) {
