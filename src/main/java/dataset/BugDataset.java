@@ -139,7 +139,7 @@ public class BugDataset {
         return -1;
     }
     
-    private ProjectMinimizer createMinimizer(int bugId) {
+    public ProjectMinimizer createMinimizer(int bugId) {
         String bugIdStr = Integer.toString(bugId);
         return new ProjectMinimizer(repoPath, pathConfig.getRelativeBuggyPath(projectName, bugIdStr), 
                 pathConfig.getRelativeFixPath(projectName, bugIdStr), pathConfig.getRelativeMetadataPath(projectName, bugIdStr));
