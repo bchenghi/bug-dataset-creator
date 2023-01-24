@@ -40,18 +40,14 @@ public class DiffParser {
         } else {
             workingFile = line.substring(line.indexOf(SOURCE_FILE_PREFIX) + 2, indexOfB - 1);
         }
-        System.out.println("working file0: " + workingFile);
         workingFile = workingFile.substring(workingProject.length() + 1);
-        System.out.println("working file1: " + workingFile);
         String buggyFile;
         if (OperatingSystem.getOS().equals(OperatingSystem.WINDOWS)) {
             buggyFile = line.substring(indexOfB + 2, line.length() - 1);
         } else {
             buggyFile = line.substring(indexOfB + 2, line.length());
         }
-        System.out.println("buggyFile file0: " + buggyFile);
         buggyFile = buggyFile.substring(buggyProject.length() + 1);
-        System.out.println("buggyFile file1: " + buggyFile);
         return new FilePair(workingFile, buggyFile);
     }
 
