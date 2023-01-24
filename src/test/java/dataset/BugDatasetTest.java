@@ -6,17 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.NoSuchFileException;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import dataset.BugDataset.BugData;
-import sav.common.core.SavRtException;
-import tregression.empiricalstudy.TestCase;
 
 class BugDatasetTest {
     private static final String FILE_ROOT = String.join(File.separator, "src", "test", "files", "dataset");
@@ -59,7 +55,9 @@ class BugDatasetTest {
         assertTrue(data.getBuggyTrace().size() > 0);
         assertTrue(data.getWorkingTrace().size() > 0);
         assertEquals(3, data.getRootCauseNode());
-        assertEquals(new TestCase("org.apache.commons.math.analysis.BinaryFunctionTest", "testAdd").getName(), data.getTestCase().getName());
+        TestCase expectedTestCase = new TestCase("org.apache.commons.math.analysis.BinaryFunctionTest", "testAdd");
+        assertEquals(expectedTestCase.testClassName(), data.getTestCase().testClassName());
+        assertEquals(expectedTestCase.testMethodName(), data.getTestCase().testMethodName());
     }
     
     

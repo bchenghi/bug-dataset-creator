@@ -20,7 +20,6 @@ import microbat.model.BreakPoint;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
 import sav.common.core.SavRtException;
-import tregression.empiricalstudy.TestCase;
 
 public class BugDataset {
     private final String projectName;
