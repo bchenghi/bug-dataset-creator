@@ -18,29 +18,15 @@ public class TestUtils {
     public static void dirsAreEqual(String expectedDirPath, String actualDirPath) throws IOException {
         Iterator<File> expectedFiles = FileUtils.iterateFiles(new File(expectedDirPath), TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
         Iterator<File> actualFiles = FileUtils.iterateFiles(new File(actualDirPath), TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
-        Map<String, File> expectedFileNameToContents = getFileNameToContentsMap(expectedFiles);
-        Map<String, File> actualFileNameToContents = getFileNameToContentsMap(actualFiles);
-        assertEquals(expectedFileNameToContents.keySet(), actualFileNameToContents.keySet());
-        for (String fileName : expectedFileNameToContents.keySet()) {
-            if (!(FileUtils.contentEquals(expectedFileNameToContents.get(fileName),
-                    actualFileNameToContents.get(fileName)))) {
-                System.out.println("filename: " + fileName);
-            }
-            assertTrue(FileUtils.contentEqualsIgnoreEOL(expectedFileNameToContents.get(fileName),
-                    actualFileNameToContents.get(fileName), null));
+        while (expectedFiles.hasNext() && actualFiles.hasNext()) {
+            File expectedFile = expectedFiles.next();
+            File actualFile = actualFiles.next();
+            assertEquals(expectedFile.getName(), actualFile.getName());
+            assertTrue(FileUtils.contentEqualsIgnoreEOL(expectedFile, actualFile, null));
         }
+        assertFalse(expectedFiles.hasNext() && actualFiles.hasNext());
     }
 
-    private static Map<String, File> getFileNameToContentsMap(Iterator<File> it) {
-        Map<String, File> result = new HashMap<>();
-        while (it.hasNext()) {
-            File file = it.next();
-            result.put(file.getName(), file);
-        }
-        return result;
-    }
-
-    
     public static void deleteIfExists(File fileToDelete) throws IOException {
         if (fileToDelete.exists()) {
             if (fileToDelete.isDirectory()) {
