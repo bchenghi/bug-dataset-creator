@@ -21,6 +21,7 @@ public class TestUtils {
         Map<String, File> actualFileNameToContents = getFileNameToContentsMap(actualFiles);
         assertEquals(expectedFileNameToContents.keySet(), actualFileNameToContents.keySet());
         for (String fileName : expectedFileNameToContents.keySet()) {
+            System.out.println(fileName);
             assertTrue(FileUtils.contentEquals(expectedFileNameToContents.get(fileName),
                     actualFileNameToContents.get(fileName)));
         }
