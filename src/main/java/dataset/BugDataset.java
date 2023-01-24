@@ -11,6 +11,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 
 import dataset.bug.creator.BuggyProjectCreator;
+import dataset.bug.minimize.ProjectMinimizer;
 import dataset.bug.model.path.MutationFrameworkPathConfiguration;
 import dataset.bug.model.path.PathConfiguration.InstrumentatorFile;
 import dataset.utils.Zipper;
@@ -23,10 +24,12 @@ import tregression.empiricalstudy.TestCase;
 
 public class BugDataset {
     private final String projectName;
+    private final String repoPath;
     private final MutationFrameworkPathConfiguration pathConfig;
     
     public BugDataset(String repoPath, String projectName) {
         super();
+        this.repoPath = repoPath;
         this.projectName = projectName;
         pathConfig = new MutationFrameworkPathConfiguration(repoPath);
     }
@@ -34,21 +37,25 @@ public class BugDataset {
     public BugDataset(String pathToProject) {
         super();
         Path path = Path.of(pathToProject);
-        this.projectName = path.getName(path.getNameCount() - 1).toString();
-        pathConfig = new MutationFrameworkPathConfiguration(path.getParent().toString());
+        projectName = path.getName(path.getNameCount() - 1).toString();
+        repoPath = path.getParent().toString();
+        pathConfig = new MutationFrameworkPathConfiguration(repoPath);
     }
 
     public static void main(String[] args) throws IOException {
         int largestBugId = 17426;
         BugDataset bugdataset = new BugDataset("D:\\chenghin\\NUS\\math_70");
         for (int i = 1; i <= largestBugId; i++) {
+            ProjectMinimizer minimizer = bugdataset.createMinimizer(i);
             if (bugdataset.exists(i, true)) {
                 try {
                     bugdataset.unzip(i);
+                    minimizer.maximise();
                     bugdataset.getData(i);
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
+                    minimizer.minimize();
                     bugdataset.zip(i);
                 }
             }
@@ -131,6 +138,12 @@ public class BugDataset {
             }
         }
         return -1;
+    }
+    
+    private ProjectMinimizer createMinimizer(int bugId) {
+        String bugIdStr = Integer.toString(bugId);
+        return new ProjectMinimizer(repoPath, pathConfig.getRelativeBuggyPath(projectName, bugIdStr), 
+                pathConfig.getRelativeFixPath(projectName, bugIdStr), pathConfig.getRelativeMetadataPath(projectName, bugIdStr));
     }
     
     public static class BugData {
