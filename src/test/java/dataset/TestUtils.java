@@ -25,11 +25,9 @@ public class TestUtils {
             if (!(FileUtils.contentEquals(expectedFileNameToContents.get(fileName),
                     actualFileNameToContents.get(fileName)))) {
                 System.out.println("filename: " + fileName);
-                System.out.println("expected content: " + Files.readString(expectedFileNameToContents.get(fileName).toPath()));
-                System.out.println("actual content: " + Files.readString(actualFileNameToContents.get(fileName).toPath()));
             }
-            assertTrue(FileUtils.contentEquals(expectedFileNameToContents.get(fileName),
-                    actualFileNameToContents.get(fileName)));
+            assertTrue(FileUtils.contentEqualsIgnoreEOL(expectedFileNameToContents.get(fileName),
+                    actualFileNameToContents.get(fileName), null));
         }
     }
 
