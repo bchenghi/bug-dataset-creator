@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -21,7 +22,12 @@ public class TestUtils {
         Map<String, File> actualFileNameToContents = getFileNameToContentsMap(actualFiles);
         assertEquals(expectedFileNameToContents.keySet(), actualFileNameToContents.keySet());
         for (String fileName : expectedFileNameToContents.keySet()) {
-            System.out.println(fileName);
+            if (!(FileUtils.contentEquals(expectedFileNameToContents.get(fileName),
+                    actualFileNameToContents.get(fileName)))) {
+                System.out.println("filename: " + fileName);
+                System.out.println("expected content: " + Files.readString(expectedFileNameToContents.get(fileName).toPath()));
+                System.out.println("actual content: " + Files.readString(actualFileNameToContents.get(fileName).toPath()));
+            }
             assertTrue(FileUtils.contentEquals(expectedFileNameToContents.get(fileName),
                     actualFileNameToContents.get(fileName)));
         }
