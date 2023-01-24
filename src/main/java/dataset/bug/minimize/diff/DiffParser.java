@@ -34,11 +34,21 @@ public class DiffParser {
     private static FilePair createFilePair(String line, String workingProject, String buggyProject) {
         assert(line.startsWith("diff"));
         int indexOfB = line.indexOf(TARGET_FILE_PREFIX);
-        String workingFile = line.substring(line.indexOf(SOURCE_FILE_PREFIX) + 2, indexOfB - 3);
+        String workingFile;
+        if (OperatingSystem.getOS().equals(OperatingSystem.WINDOWS)) {
+            workingFile = line.substring(line.indexOf(SOURCE_FILE_PREFIX) + 2, indexOfB - 3);
+        } else {
+            workingFile = line.substring(line.indexOf(SOURCE_FILE_PREFIX) + 2, indexOfB - 1);
+        }
         System.out.println("working file0: " + workingFile);
         workingFile = workingFile.substring(workingProject.length() + 1);
         System.out.println("working file1: " + workingFile);
-        String buggyFile = line.substring(indexOfB + 2, line.length() - 1);
+        String buggyFile;
+        if (OperatingSystem.getOS().equals(OperatingSystem.WINDOWS)) {
+            buggyFile = line.substring(indexOfB + 2, line.length() - 1);
+        } else {
+            buggyFile = line.substring(indexOfB + 2, line.length());
+        }
         System.out.println("buggyFile file0: " + buggyFile);
         buggyFile = buggyFile.substring(buggyProject.length() + 1);
         System.out.println("buggyFile file1: " + buggyFile);
