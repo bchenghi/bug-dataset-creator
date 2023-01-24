@@ -49,12 +49,12 @@ public class BugDataset {
             if (bugdataset.exists(i, true)) {
                 try {
                     bugdataset.unzip(i);
-                    minimizer.maximise();
+                    //minimizer.maximise();
                     bugdataset.getData(i);
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
-                    minimizer.minimize();
+                    //minimizer.minimize();
                     bugdataset.zip(i);
                 }
             }
@@ -120,7 +120,8 @@ public class BugDataset {
         }
         try {
             RootCause rootCause = new RootCause(Files.readString(Path.of(pathToRootCauseFile)));
-            return new BugData(getRootCauseNode(rootCause, workingTrace), buggyTrace, workingTrace, Files.readString(Path.of(pathToTestCaseFile)));
+            return new BugData(getRootCauseNode(rootCause, workingTrace), buggyTrace, workingTrace,
+                    Files.readString(Path.of(pathToTestCaseFile)), projectName);
         } catch (NoSuchFileException e) {
             throw new IOException(e);
         }
@@ -150,13 +151,15 @@ public class BugDataset {
         private final Trace buggyTrace;
         private final Trace workingTrace;
         private final TestCase testCase;
+        private final String projectName;
         
-        public BugData(int rootCauseNode, Trace buggyTrace, Trace workingTrace, String testCase) {
+        public BugData(int rootCauseNode, Trace buggyTrace, Trace workingTrace, String testCase, String projectName) {
             super();
             this.rootCauseNode = rootCauseNode;
             this.buggyTrace = buggyTrace;
             this.workingTrace = workingTrace;
             this.testCase = formTestCase(testCase);
+            this.projectName = projectName;
         }
 
         public int getRootCauseNode() {
@@ -174,12 +177,17 @@ public class BugDataset {
         public TestCase getTestCase() {
             return testCase;
         }
-        
+
+        public String getProjectName() {
+            return projectName;
+        }
+
         private TestCase formTestCase(String testCaseStr) {
             // Example: org.apache.commons.math.analysis.ComposableFunctionTest#testComposition(),54,102
-            String testClassName = testCaseStr.substring(0, testCaseStr.indexOf("#"));
-            String testMethodName = testCaseStr.substring(testCaseStr.indexOf("#") + 1, testCaseStr.indexOf("("));
-            return new TestCase(testClassName, testMethodName);
+            int idxOfPound = testCaseStr.indexOf("#");
+            String testClassName = testCaseStr.substring(0, idxOfPound);
+            String testMethodName = testCaseStr.substring(idxOfPound + 1, testCaseStr.indexOf("("));
+            return new TestCase(testClassName, testMethodName, testCaseStr);
         }
     }
     

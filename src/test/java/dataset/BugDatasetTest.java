@@ -10,6 +10,7 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import dataset.BugDataset.BugData;
@@ -55,9 +56,11 @@ class BugDatasetTest {
         assertTrue(data.getBuggyTrace().size() > 0);
         assertTrue(data.getWorkingTrace().size() > 0);
         assertEquals(3, data.getRootCauseNode());
-        TestCase expectedTestCase = new TestCase("org.apache.commons.math.analysis.BinaryFunctionTest", "testAdd");
+        TestCase expectedTestCase = new TestCase("org.apache.commons.math.analysis.BinaryFunctionTest",
+                "testAdd", "org.apache.commons.math.analysis.BinaryFunctionTest#testAdd(),24,28");
         assertEquals(expectedTestCase.testClassName(), data.getTestCase().testClassName());
         assertEquals(expectedTestCase.testMethodName(), data.getTestCase().testMethodName());
+        assertEquals(expectedTestCase.toString(), data.getTestCase().toString());
     }
     
     
@@ -85,9 +88,17 @@ class BugDatasetTest {
         BugDataset bugDataset = new BugDataset(REPO_PATH, PROJECT_NAME);
         assertTrue(bugDataset.exists(1, false));
     }
-    
+
+    @BeforeEach
+    void beforeEach() throws IOException {
+        clean();
+    }
     @AfterEach
     void afterEach() throws IOException {
+        clean();
+    }
+
+    void clean() throws IOException {
         TestUtils.deleteIfExists(new File(UNZIPPED_BUG_2));
         TestUtils.deleteIfExists(new File(ZIPPED_BUG_1));
         restoreOriginalProjects();
