@@ -79,13 +79,13 @@ class BugDatasetTest {
     @Test
     void exists_dirDoesNotExist_returnsFalse() throws IOException {
         BugDataset bugDataset = new BugDataset(REPO_PATH, PROJECT_NAME);
-        assertFalse(bugDataset.exists(10));
+        assertFalse(bugDataset.exists(10, false));
     }
     
     @Test
     void exists_dirExists_returnsTrue() throws IOException {
         BugDataset bugDataset = new BugDataset(REPO_PATH, PROJECT_NAME);
-        assertTrue(bugDataset.exists(1));
+        assertTrue(bugDataset.exists(1, false));
     }
     
     @AfterEach

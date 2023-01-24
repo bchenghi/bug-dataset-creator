@@ -39,24 +39,17 @@ public class BugDataset {
     }
 
     public static void main(String[] args) throws IOException {
-        // Zips all the bugs in the repository
-        String repoPath = "D:\\chenghin\\NUS";
-        String projectName = "math_70";
         int largestBugId = 17426;
-        BugDataset bugdataset = new BugDataset(repoPath, projectName);
-//        bugdataset.zip(1);
-        List<int[]> bugRanges = bugdataset.createBugRanges(10, largestBugId);
-        for (int[] range : bugRanges) {
-            int startBugId = range[0];
-            int endBugId = range[1];
-            String newDirName = "bugs-" + startBugId + "-"
-                    + endBugId;
-            String newDirPath = repoPath + File.separator + newDirName;
-            File newDir = new File(newDirPath);
-            newDir.mkdir();
-            for (int i = startBugId; i <= endBugId; i++) {
-                if (new File(bugdataset.getBugIdPath(i) + ".zip").exists()) {
-                    FileUtils.copyFile(new File(bugdataset.getBugIdPath(i) + ".zip"), new File(newDir + File.separator + i + ".zip"));
+        BugDataset bugdataset = new BugDataset("D:\\chenghin\\NUS\\math_70");
+        for (int i = 1; i <= largestBugId; i++) {
+            if (bugdataset.exists(i, true)) {
+                try {
+                    bugdataset.unzip(i);
+                    bugdataset.getData(i);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    bugdataset.zip(i);
                 }
             }
         }
@@ -82,8 +75,10 @@ public class BugDataset {
         return result;
     }
     
-    public boolean exists(int bugId) {
-        return new File(pathConfig.getBugPath(projectName, Integer.toString(bugId))).exists();
+    public boolean exists(int bugId, boolean isZipped) {
+        String path = pathConfig.getBugPath(projectName, Integer.toString(bugId));
+        if (isZipped) path += ".zip";
+        return new File(path).exists();
     }
     
     public String getBugIdPath(int bugId) {
