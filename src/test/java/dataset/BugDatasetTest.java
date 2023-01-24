@@ -56,6 +56,7 @@ class BugDatasetTest {
         assertTrue(data.getBuggyTrace().size() > 0);
         assertTrue(data.getWorkingTrace().size() > 0);
         assertEquals(3, data.getRootCauseNode());
+        assertEquals(PROJECT_NAME, data.getProjectName());
         TestCase expectedTestCase = new TestCase("org.apache.commons.math.analysis.BinaryFunctionTest",
                 "testAdd", "org.apache.commons.math.analysis.BinaryFunctionTest#testAdd(),24,28");
         assertEquals(expectedTestCase.testClassName(), data.getTestCase().testClassName());
