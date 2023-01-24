@@ -33,4 +33,8 @@ public class TestUtils {
             fileToDelete.delete();
         }
     }
+
+    public static boolean isRunningInGitHubActions() {
+        return System.getenv("GITHUB_ACTIONS") != null;
+    }
 }

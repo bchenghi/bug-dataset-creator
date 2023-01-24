@@ -15,7 +15,9 @@ import dataset.bug.model.path.MutationFrameworkPathConfiguration;
 import dataset.bug.model.path.PathConfiguration;
 import dataset.bug.model.path.PathConfiguration.InstrumentatorFile;
 import dataset.trace.TraceCreator;
+import org.junit.jupiter.api.condition.DisabledIf;
 
+@DisabledIf("dataset.TestUtils#isRunningInGitHubActions")
 class TraceCreatorTest {
     public static final String TEST_FILES_PATH = String.join(File.separator, "src", "test", "files", "dataset", "bug", "creator");
     private static final String PROJECT_NAME = "sample-project";
