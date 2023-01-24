@@ -5,9 +5,9 @@ import dataset.bug.model.path.MutationFrameworkPathConfiguration;
 import dataset.bug.model.path.PathConfiguration;
 import dataset.bug.model.project.DatasetProject;
 import dataset.bug.model.project.MutationFrameworkDatasetProject;
+import microbat.instrumentation.output.RunningInfo;
 import dataset.trace.TraceCollector;
 import jmutation.model.TestCase;
-import jmutation.trace.FileReader;
 import microbat.model.trace.Trace;
 
 import java.io.File;
@@ -117,15 +117,8 @@ public class Main {
     }
 
     private static boolean checkTraceFile(String traceFile) {
-        try {
-            FileReader reader = new FileReader(traceFile);
-            Trace trace = reader.readMainTrace();
-            reader.close();
-            return trace.getExecutionList().size() > 0;
-        } catch (FileNotFoundException e) {
-            return false;
-        } catch (IOException e) {
-            return false;
-        }
+        RunningInfo runningInfo = RunningInfo.readFromFile(traceFile);
+        Trace trace = runningInfo.getMainTrace();
+        return trace.getExecutionList().size() > 0;
     }
 }
