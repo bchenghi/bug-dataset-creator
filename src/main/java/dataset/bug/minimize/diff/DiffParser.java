@@ -45,7 +45,7 @@ public class DiffParser {
         if (OperatingSystem.getOS().equals(OperatingSystem.WINDOWS)) {
             buggyFile = line.substring(indexOfB + 2, line.length() - 1);
         } else {
-            buggyFile = line.substring(indexOfB + 2, line.length());
+            buggyFile = line.substring(indexOfB + 2);
         }
         buggyFile = buggyFile.substring(buggyProject.length() + 1);
         return new FilePair(workingFile, buggyFile);
