@@ -33,6 +33,7 @@ public class Zipper {
     }
     
     private static boolean zip(File file, String parentPath, ZipOutputStream zos) {
+        logger.info(String.format("Zipping %s", file.getAbsoluteFile()));
         if (file.isDirectory()) {
             File[] children = file.listFiles();
             for (File child : children) {
@@ -50,9 +51,11 @@ public class Zipper {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+                logger.severe(String.format("Zipping %s failed", file.getAbsoluteFile()));
                 return false;
             }
         }
+        logger.info(String.format("Done zipping %s", file.getAbsoluteFile()));
         return true;
     }
     

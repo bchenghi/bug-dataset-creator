@@ -18,6 +18,16 @@ public class BugCheckHandler extends Handler {
     }
 
     @Override
+    public void handle(Request request) {
+        if (individualHandler(request)) {
+            nextHandler.handle(request);
+            return;
+        }
+        // Tell the next handle that the traces were not collected
+        nextHandler.handle(new Request(false));
+    }
+
+    @Override
     public boolean individualHandler(Request request) {
         // Check if traces are present.
         if (traceCreator.isDone()) {

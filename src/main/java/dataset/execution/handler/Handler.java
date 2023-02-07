@@ -16,5 +16,10 @@ public abstract class Handler {
         nextHandler.handle(request);
     }
 
+    /**
+     * Executes custom code. Returns true if it should call the next handler, otherwise, false.
+     * @param request
+     * @return
+     */
     protected abstract boolean individualHandler(Request request);
 }

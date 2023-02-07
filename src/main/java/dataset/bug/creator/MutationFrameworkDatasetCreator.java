@@ -1,7 +1,10 @@
 package dataset.bug.creator;
 
 import dataset.bug.model.BuggyProject;
+import dataset.utils.Counter;
 import jmutation.MutationFramework;
+import jmutation.MutationFramework.MutationFrameworkBuilder;
+import jmutation.model.PrecheckExecutionResult;
 import jmutation.model.TestCase;
 import jmutation.model.mutation.MutationFrameworkConfig;
 import jmutation.model.mutation.MutationFrameworkConfig.MutationFrameworkConfigBuilder;
@@ -17,11 +20,13 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * TODO: We can delete this class if Runner can handle calling BuggyProjectCreator and the handler works
+ */
 public class MutationFrameworkDatasetCreator {
     public static final String BUGGY_PROJECT_DIR = "bug";
     public static final String WORKING_PROJECT_DIR = "fix";
-    private static final String CREATED_BUGGY_PROJECT_FILE = "createdBugs.json";
-    public static int bugId = 0;
+    public static final String CREATED_BUGGY_PROJECT_FILE = "createdBugs.json";
     private final MutationFramework mutationFramework;
 
     public MutationFrameworkDatasetCreator(MutationFramework mutationFramework) {
@@ -32,7 +37,8 @@ public class MutationFrameworkDatasetCreator {
         MutationFrameworkConfigBuilder configBuilder = new MutationFrameworkConfigBuilder();
         configBuilder.setProjectPath(projectPath);
         MutationFrameworkConfig mutationFrameworkConfig = configBuilder.build();
-        this.mutationFramework = new MutationFramework(mutationFrameworkConfig);
+        MutationFrameworkBuilder mutationFrameworkBuilder = new MutationFrameworkBuilder(mutationFrameworkConfig);
+        this.mutationFramework = mutationFrameworkBuilder.build();
     }
 
     public static void main(String[] args) {
@@ -56,13 +62,13 @@ public class MutationFrameworkDatasetCreator {
         List<TestCase> testCaseList = mutationFramework.getTestCases();
         String createdBugsFilePath = String.join(File.separator, datasetPath, CREATED_BUGGY_PROJECT_FILE);
         JSONObject storedProjects = getStoredProjects(createdBugsFilePath);
-        bugId = storedProjects.length();
-        int mutationsLeft = 0;
+        int bugId = storedProjects.length() + 1;
         for (TestCase testCase : testCaseList) {
-            mutationFramework.getConfiguration().setTestCase(testCase);
+            mutationFramework.setTestCase(testCase);
             List<MutationCommand> commands;
             try {
-                commands = mutationFramework.analyse();
+                PrecheckExecutionResult precheckExecutionResult = mutationFramework.runPrecheck();
+                commands = mutationFramework.analyse(precheckExecutionResult.getCoverage());
             } catch (RuntimeException e) {
                 e.printStackTrace();
                 continue;
@@ -73,10 +79,9 @@ public class MutationFrameworkDatasetCreator {
                 if (checkBuggyProjectAlreadyCloned(storedProjects, buggyProject)) {
                     continue;
                 }
-                mutationsLeft++;
-                System.out.println(mutationsLeft);
-                //                executorService.submit(new BuggyProjectCreator(repositoryPath, projectPath, buggyProject,
-                //                        createdBugsFilePath));
+                executorService.submit(new BuggyProjectCreator(repositoryPath, projectPath, buggyProject,
+                        createdBugsFilePath, bugId));
+                bugId++;
             }
         }
         executorService.shutdown();

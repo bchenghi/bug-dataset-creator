@@ -5,7 +5,9 @@ import dataset.bug.minimize.ProjectMinimizer;
 import dataset.bug.model.BuggyProject;
 import dataset.bug.model.path.MutationFrameworkPathConfiguration;
 import dataset.bug.model.path.PathConfiguration;
+import dataset.utils.Counter;
 import jmutation.MutationFramework;
+import jmutation.MutationFramework.MutationFrameworkBuilder;
 import jmutation.model.mutation.DumpFilePathConfig;
 import jmutation.model.mutation.MutationFrameworkConfig;
 import jmutation.model.mutation.MutationResult;
@@ -21,24 +23,24 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static dataset.bug.creator.MutationFrameworkDatasetCreator.bugId;
-
 public class BuggyProjectCreator implements Runnable {
     private static final Logger logger = Log.createLogger(BuggyProjectCreator.class);
-    private static final Object lock = new Object();
     private static final Object storageFileLock = new Object();
     private final String repositoryPath;
     private final String projectPath;
     private final String storageFilePath;
     private final BuggyProject buggyProject;
+    private final int bugId;
     public static final String ROOTCAUSE_FILE_NAME = "rootcause.txt";
     public static final String TESTCASE_FILE_NAME = "testcase.txt";
 
-    public BuggyProjectCreator(String repositoryPath, String projectPath, BuggyProject buggyProject, String storageFilePath) {
+    public BuggyProjectCreator(String repositoryPath, String projectPath, BuggyProject buggyProject,
+                               String storageFilePath, int bugId) {
         this.repositoryPath = repositoryPath;
         this.projectPath = projectPath;
         this.buggyProject = buggyProject;
         this.storageFilePath = storageFilePath;
+        this.bugId = bugId;
     }
 
     private static void createFile(String contents, String pathToFile, String fileName) {
@@ -52,72 +54,40 @@ public class BuggyProjectCreator implements Runnable {
     }
 
     public void run() {
-        StringBuilder mutatedProjPath = new StringBuilder(repositoryPath + File.separator +
-                buggyProject.projectName() + File.separator);
-        int currBugId = increaseAndGetBugId();
-        mutatedProjPath.append(currBugId);
-        mutatedProjPath.append(File.separator);
-        
-        MutationFrameworkConfigBuilder configBuilder = new MutationFrameworkConfigBuilder();        
-        configBuilder.setProjectPath(projectPath);
-        configBuilder.setMutator(new HeuristicMutator());
-        DumpFilePathConfig dumpFilePathConfig = new DumpFilePathConfig();
-        dumpFilePathConfig.setMutatedPrecheckFilePath(mutatedProjPath +
-                DumpFilePathConfig.DEFAULT_BUGGY_PRECHECK_FILE);
-        dumpFilePathConfig.setMutatedTraceFilePath(mutatedProjPath +
-                DumpFilePathConfig.DEFAULT_BUGGY_TRACE_FILE);
-        int mutatedBugPathLen = mutatedProjPath.length();
-        mutatedProjPath.append(MutationFrameworkDatasetCreator.BUGGY_PROJECT_DIR);
-        configBuilder.setMutatedProjectPath(mutatedProjPath.toString());
-        mutatedProjPath.delete(mutatedBugPathLen, mutatedBugPathLen + 3);
-        configBuilder.setTestCase(buggyProject.testCase());
-        MutationFramework mutationFramework = new MutationFramework(configBuilder.build());
-
+        String mutatedProjPath = createMutatedProjectPath(bugId);
+        MutationFrameworkConfig config = createMutationFrameworkConfig(mutatedProjPath);
+        MutationFrameworkBuilder mutationFrameworkBuilder = new MutationFrameworkBuilder(config);
+        MutationFramework mutationFramework = mutationFrameworkBuilder.build();
+        mutationFramework.setTestCase(buggyProject.testCase());
         try {
-            log(currBugId, "Start mutating");
-            MutationResult result = mutationFramework.mutate(buggyProject.command());
-            log(currBugId, "Finish mutating");
+            log(bugId, "Start mutating");
+            MutationResult result = mutationFramework.mutate(buggyProject.command(), null);
+            log(bugId, "Finish mutating");
             if (result.getMutatedPrecheckExecutionResult() == null || result.getMutatedPrecheckExecutionResult().testCasePassed()) {
                 try {
-                    log(currBugId, "Test case passed or precheck is null, deleting", Level.WARNING);
-                    FileUtils.deleteDirectory(new File(mutatedProjPath.toString()));
-                    log(currBugId, "Test case passed or precheck is null, deleted", Level.WARNING);
+                    log(bugId, "Test case passed or precheck is null, deleting", Level.WARNING);
+                    FileUtils.deleteDirectory(new File(mutatedProjPath));
+                    log(bugId, "Test case passed or precheck is null, deleted", Level.WARNING);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
                 return;
             }
-            log(currBugId, "Test case failed, creating testcase and rootcause files");
-            createFile(buggyProject.testCase().toString(), mutatedProjPath.toString(), TESTCASE_FILE_NAME);
-            createFile(buggyProject.command().toString(), mutatedProjPath.toString(), ROOTCAUSE_FILE_NAME);
-            log(currBugId, "Created testcase and rootcause files. Minimizing.");
-            if (!minimize(mutatedProjPath.toString(), currBugId)) {
-                try {
-                    log(currBugId, "Minimize failed. Deleting.", Level.WARNING);
-                    FileUtils.deleteDirectory(new File(mutatedProjPath.toString()));
-                    log(currBugId, "Minimize failed. Deleted.", Level.WARNING);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return;
-            }
-            log(currBugId, "Finish minimizing, writing to storage file");
+            log(bugId, "Test case failed, creating testcase and rootcause files");
+            createFile(buggyProject.testCase().toString(), mutatedProjPath, TESTCASE_FILE_NAME);
+            createFile(buggyProject.command().toString(), mutatedProjPath, ROOTCAUSE_FILE_NAME);
+            log(bugId, "Created testcase and rootcause files. Writing to storage file.");
             writeToStorageFile();
-            log(currBugId, "Written to storage file");
+            log(bugId, "Written to storage file");
         } catch (RuntimeException e) {
             e.printStackTrace();
         }
-        log(currBugId, "Done");
+        log(bugId, "Done");
     }
 
-    private int increaseAndGetBugId() {
-        synchronized (lock) {
-            logger.log(Level.INFO, Thread.currentThread().getName() + " : " + bugId);
-            bugId++;
-            return bugId;
-        }
-    }
-
+    /**
+     * Writes to json file that this project, test case and command combination is already stored
+     */
     private void writeToStorageFile() {
         synchronized (storageFileLock) {
             logger.log(Level.INFO, Thread.currentThread().getName() + " : writing to json file");
@@ -153,5 +123,30 @@ public class BuggyProjectCreator implements Runnable {
 
     private void log(int bugId, String msg, Level level) {
         logger.log(level, bugId + ": " + msg);
+    }
+
+    private MutationFrameworkConfig createMutationFrameworkConfig(String mutatedProjPathStr) {
+        StringBuilder mutatedProjPath = new StringBuilder(mutatedProjPathStr);
+        MutationFrameworkConfigBuilder configBuilder = new MutationFrameworkConfigBuilder();
+        configBuilder.setProjectPath(projectPath);
+        configBuilder.setMutator(new HeuristicMutator());
+        DumpFilePathConfig dumpFilePathConfig = new DumpFilePathConfig();
+        dumpFilePathConfig.setMutatedPrecheckFilePath(mutatedProjPath +
+                DumpFilePathConfig.DEFAULT_BUGGY_PRECHECK_FILE);
+        dumpFilePathConfig.setMutatedTraceFilePath(mutatedProjPath +
+                DumpFilePathConfig.DEFAULT_BUGGY_TRACE_FILE);
+        int mutatedBugPathLen = mutatedProjPath.length();
+        mutatedProjPath.append(MutationFrameworkDatasetCreator.BUGGY_PROJECT_DIR);
+        configBuilder.setMutatedProjectPath(mutatedProjPath.toString());
+        mutatedProjPath.delete(mutatedBugPathLen, mutatedBugPathLen + 3);
+        return configBuilder.build();
+    }
+
+    private String createMutatedProjectPath(int currBugId) {
+        StringBuilder mutatedProjPath = new StringBuilder(repositoryPath + File.separator +
+                buggyProject.projectName() + File.separator);
+        mutatedProjPath.append(currBugId);
+        mutatedProjPath.append(File.separator);
+        return mutatedProjPath.toString();
     }
 }

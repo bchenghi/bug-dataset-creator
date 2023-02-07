@@ -1,1 +1,0 @@
-org.apache.commons.math.analysis.BinaryFunctionTest#testAdd(),24,28
