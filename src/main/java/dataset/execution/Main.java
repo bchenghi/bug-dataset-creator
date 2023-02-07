@@ -24,9 +24,9 @@ import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import static dataset.bug.creator.MutationFrameworkDatasetCreator.CREATED_BUGGY_PROJECT_FILE;
-import static dataset.bug.creator.MutationFrameworkDatasetCreator.WORKING_PROJECT_DIR;
-import static dataset.bug.creator.MutationFrameworkDatasetCreator.getStoredProjects;
+import static dataset.bug.creator.BuggyProjectCreator.getStoredProjects;
+import static dataset.constants.FileNames.WORKING_PROJECT_DIR;
+
 
 public class Main {
     private static final int INSTRUMENTATION_TIMEOUT = 5;

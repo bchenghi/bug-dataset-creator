@@ -14,6 +14,7 @@ import jmutation.model.mutation.MutationResult;
 import jmutation.model.mutation.MutationFrameworkConfig.MutationFrameworkConfigBuilder;
 import jmutation.mutation.heuristic.HeuristicMutator;
 
+import jmutation.utils.JSONWrapper;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONObject;
 
@@ -22,6 +23,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static dataset.constants.FileNames.BUGGY_PROJECT_DIR;
+import static dataset.constants.FileNames.WORKING_PROJECT_DIR;
 
 public class BuggyProjectCreator implements Runnable {
     private static final Logger logger = Log.createLogger(BuggyProjectCreator.class);
@@ -91,7 +95,7 @@ public class BuggyProjectCreator implements Runnable {
     private void writeToStorageFile() {
         synchronized (storageFileLock) {
             logger.log(Level.INFO, Thread.currentThread().getName() + " : writing to json file");
-            JSONObject storedJSON = MutationFrameworkDatasetCreator.getStoredProjects(storageFilePath);
+            JSONObject storedJSON = getStoredProjects(storageFilePath);
             storedJSON.put(buggyProject.key(), buggyProject.createJSONObject());
             try (FileWriter writer = new FileWriter(storageFilePath)) {
                 writer.write(storedJSON.toString());
@@ -112,8 +116,8 @@ public class BuggyProjectCreator implements Runnable {
         String metadataPath = pathConfiguration.getRelativeMetadataPath(projectName, Integer.toString(bugId));
         buggyProjectPath.substring(repositoryPath.length());
         return new ProjectMinimizer(repositoryPath, String.join(File.separator,
-                buggyProject.projectName(), Integer.toString(bugId), MutationFrameworkDatasetCreator.BUGGY_PROJECT_DIR),
-                String.join(File.separator, buggyProject.projectName(), MutationFrameworkDatasetCreator.WORKING_PROJECT_DIR),
+                buggyProject.projectName(), Integer.toString(bugId), BUGGY_PROJECT_DIR),
+                String.join(File.separator, buggyProject.projectName(), WORKING_PROJECT_DIR),
                 metadataPath);
     }
 
@@ -136,7 +140,7 @@ public class BuggyProjectCreator implements Runnable {
         dumpFilePathConfig.setMutatedTraceFilePath(mutatedProjPath +
                 DumpFilePathConfig.DEFAULT_BUGGY_TRACE_FILE);
         int mutatedBugPathLen = mutatedProjPath.length();
-        mutatedProjPath.append(MutationFrameworkDatasetCreator.BUGGY_PROJECT_DIR);
+        mutatedProjPath.append(BUGGY_PROJECT_DIR);
         configBuilder.setMutatedProjectPath(mutatedProjPath.toString());
         mutatedProjPath.delete(mutatedBugPathLen, mutatedBugPathLen + 3);
         return configBuilder.build();
@@ -148,5 +152,13 @@ public class BuggyProjectCreator implements Runnable {
         mutatedProjPath.append(currBugId);
         mutatedProjPath.append(File.separator);
         return mutatedProjPath.toString();
+    }
+
+    public static JSONObject getStoredProjects(String pathToFile) {
+        try {
+            return JSONWrapper.getJSONObjectFromFile(pathToFile);
+        } catch (RuntimeException e) {
+            return new JSONObject();
+        }
     }
 }

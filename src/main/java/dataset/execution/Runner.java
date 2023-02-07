@@ -12,10 +12,9 @@ import dataset.execution.handler.ZipBugDirHandler;
 
 import java.io.File;
 
-import static dataset.bug.creator.MutationFrameworkDatasetCreator.CREATED_BUGGY_PROJECT_FILE;
-
 public class Runner implements Runnable {
     private final Handler startHandler;
+    private final String CREATED_BUGGY_PROJECT_FILE = "createdBugs.json";
 
     /**
      * Set up handlers to

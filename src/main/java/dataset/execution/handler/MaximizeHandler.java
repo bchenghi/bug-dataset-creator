@@ -2,11 +2,13 @@ package dataset.execution.handler;
 
 import java.io.File;
 
-import dataset.bug.creator.MutationFrameworkDatasetCreator;
 import dataset.bug.minimize.ProjectMinimizer;
 import dataset.bug.model.path.MutationFrameworkPathConfiguration;
 import dataset.bug.model.path.PathConfiguration;
 import dataset.execution.Request;
+
+import static dataset.constants.FileNames.BUGGY_PROJECT_DIR;
+import static dataset.constants.FileNames.WORKING_PROJECT_DIR;
 
 public class MaximizeHandler extends Handler {
     private final ProjectMinimizer minimizer;
@@ -25,8 +27,8 @@ public class MaximizeHandler extends Handler {
         PathConfiguration pathConfiguration = new MutationFrameworkPathConfiguration(repositoryPath);
         String metadataPath = pathConfiguration.getRelativeMetadataPath(projectName, Integer.toString(bugId));
         return new ProjectMinimizer(repositoryPath, String.join(File.separator,
-                projectName, Integer.toString(bugId), MutationFrameworkDatasetCreator.BUGGY_PROJECT_DIR),
-                String.join(File.separator, projectName, MutationFrameworkDatasetCreator.WORKING_PROJECT_DIR),
+                projectName, Integer.toString(bugId), BUGGY_PROJECT_DIR),
+                String.join(File.separator, projectName, WORKING_PROJECT_DIR),
                 metadataPath);
     }
 }
