@@ -21,13 +21,14 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static dataset.constants.FileNames.BUGGY_PROJECT_DIR;
 import static dataset.constants.FileNames.WORKING_PROJECT_DIR;
 
-public class BuggyProjectCreator implements Runnable {
+public class BuggyProjectCreator implements Callable<Boolean> {
     private static final Logger logger = Log.createLogger(BuggyProjectCreator.class);
     private static final Object storageFileLock = new Object();
     private final String repositoryPath;
@@ -57,7 +58,7 @@ public class BuggyProjectCreator implements Runnable {
         }
     }
 
-    public void run() {
+    public Boolean call() {
         String mutatedProjPath = createMutatedProjectPath(bugId);
         MutationFrameworkConfig config = createMutationFrameworkConfig(mutatedProjPath);
         MutationFrameworkBuilder mutationFrameworkBuilder = new MutationFrameworkBuilder(config);
@@ -75,7 +76,7 @@ public class BuggyProjectCreator implements Runnable {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                return;
+                return false;
             }
             log(bugId, "Test case failed, creating testcase and rootcause files");
             createFile(buggyProject.testCase().toString(), mutatedProjPath, TESTCASE_FILE_NAME);
@@ -85,8 +86,10 @@ public class BuggyProjectCreator implements Runnable {
             log(bugId, "Written to storage file");
         } catch (RuntimeException e) {
             e.printStackTrace();
+            return false;
         }
         log(bugId, "Done");
+        return true;
     }
 
     /**

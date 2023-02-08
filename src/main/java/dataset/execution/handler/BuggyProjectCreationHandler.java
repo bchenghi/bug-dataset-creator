@@ -17,7 +17,6 @@ public class BuggyProjectCreationHandler extends Handler {
 
     @Override
     protected boolean individualHandler(Request request) {
-        buggyProjectCreator.run();
-        return true;
+        return buggyProjectCreator.call();
     }
 }

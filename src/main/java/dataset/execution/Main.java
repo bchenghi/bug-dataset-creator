@@ -31,16 +31,10 @@ import static dataset.constants.FileNames.WORKING_PROJECT_DIR;
 public class Main {
     private static final int INSTRUMENTATION_TIMEOUT = 5;
     public static void main(String[] args) throws InterruptedException {
-        final String projectName = "math_70-test";
+        final String projectName = "commons-pool";
         final String repoPath = "D:\\chenghin\\NUS";
-        String originalProjectPath = "C:\\Users\\bchenghi\\Desktop\\NUS\\FYP\\repos\\java-mutation-framework\\sample\\math_70";
+        String originalProjectPath = "D:\\chenghin\\commons-pool";
 //        C:\Users\bchenghi\Desktop\jsprit-master\jsprit-core
-        int startId = 1;
-        int endId = 18000;
-        List<Integer> bugIds = new ArrayList<>();
-        for (int bugId = startId; bugId <= endId; bugId++) {
-            bugIds.add(bugId);
-        }
         runBugDataCollection(repoPath, projectName, originalProjectPath);
     }
 
@@ -60,7 +54,7 @@ public class Main {
 
     private static void runBugDataCollection(String repoPath, String projectName, String originalProjectPath) {
         MutationFrameworkPathConfiguration pathConfiguration = new MutationFrameworkPathConfiguration(repoPath);
-        int numOfCores = 1;
+        int numOfCores = 2;
         MutationFrameworkConfigBuilder configBuilder = new MutationFrameworkConfigBuilder();
         configBuilder.setProjectPath(originalProjectPath);
         MutationFrameworkConfig mutationFrameworkConfig = configBuilder.build();
@@ -92,7 +86,6 @@ public class Main {
                 executorService.submit(new Runner(repoPath, projectName, bugId, INSTRUMENTATION_TIMEOUT, buggyProject,
                         pathConfiguration.getBugPath(projectName, String.valueOf(bugId)), originalProjectPath));
                 bugId++;
-                return;
             }
         }
         executorService.shutdown();
