@@ -20,10 +20,6 @@ public class DeleteBugDirHandler extends Handler {
 
     @Override
     protected boolean individualHandler(Request request) {
-        // Delete the bug dir if the previous handler tells it to delete
-        if (request.hasPassed()) {
-            return true;
-        }
         delete();
         return false;
     }
