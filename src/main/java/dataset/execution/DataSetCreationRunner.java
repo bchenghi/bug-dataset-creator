@@ -12,8 +12,9 @@ import dataset.execution.handler.ZipBugDirHandler;
 
 import java.io.File;
 
-public class Runner implements Runnable {
+public class DataSetCreationRunner implements Runnable {
     private final Handler startHandler;
+    private final Handler deleteBugDirHandler;
     private final String CREATED_BUGGY_PROJECT_FILE = "createdBugs.json";
 
     /**
@@ -31,12 +32,14 @@ public class Runner implements Runnable {
      * @param buggyProject
      * @param pathToBugDir
      */
-    public Runner(String repoPath, String projectName, int bugId, int instrumentationTimeout,
-                  BuggyProject buggyProject, String pathToBugDir, String pathToOriginalProj) {
+    public DataSetCreationRunner(String repoPath, String projectName, int bugId, int instrumentationTimeout,
+                                 BuggyProject buggyProject, String pathToBugDir, String pathToOriginalProj) {
+
+        deleteBugDirHandler = new DeleteBugDirHandler(pathToBugDir);
+
         ZipBugDirHandler zipBugDirHandler = new ZipBugDirHandler(pathToBugDir);
         MinimizeHandler minimizeHandler = new MinimizeHandler(zipBugDirHandler, repoPath, projectName, bugId);
-        DeleteBugDirHandler deleteBugDirHandler = new DeleteBugDirHandler(minimizeHandler, pathToBugDir);
-        BugCheckHandler checkHandler = new BugCheckHandler(deleteBugDirHandler, repoPath, projectName, bugId);
+        BugCheckHandler checkHandler = new BugCheckHandler(minimizeHandler, repoPath, projectName, bugId);
         TraceCollectionHandler traceHandler = new TraceCollectionHandler(checkHandler, repoPath,
                 projectName, bugId, instrumentationTimeout);
 
@@ -53,6 +56,9 @@ public class Runner implements Runnable {
             startHandler.handle(new Request(true));
         } catch (RuntimeException e) {
             e.printStackTrace();
+        } finally {
+            // Delete the bug dir anyway, since either pass or fail, it is no longer necessary
+            deleteBugDirHandler.handle(new Request(true));
         }
     }
 }

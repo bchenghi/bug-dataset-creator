@@ -2,14 +2,10 @@ package dataset.execution;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
-import dataset.bug.creator.BuggyProjectCreator;
 import dataset.bug.model.BuggyProject;
 import dataset.bug.model.path.MutationFrameworkPathConfiguration;
 import dataset.execution.handler.BugCheckHandler;
@@ -34,7 +30,6 @@ public class Main {
         final String projectName = "commons-pool";
         final String repoPath = "D:\\chenghin\\NUS";
         String originalProjectPath = "D:\\chenghin\\commons-pool";
-//        C:\Users\bchenghi\Desktop\jsprit-master\jsprit-core
         runBugDataCollection(repoPath, projectName, originalProjectPath);
     }
 
@@ -65,7 +60,7 @@ public class Main {
         ExecutorService executorService = Executors.newFixedThreadPool(numOfCores);
         List<TestCase> testCaseList = mutationFramework.getTestCases();
         JSONObject storedProjects = getStoredProjects(pathConfiguration.getStoragePath(projectName));
-        int bugId = storedProjects.length() + 1;
+        int bugId = 466;
         for (TestCase testCase : testCaseList) {
             mutationFramework.setTestCase(testCase);
             List<MutationCommand> commands;
@@ -83,7 +78,7 @@ public class Main {
                 if (checkBuggyProjectAlreadyCloned(storedProjects, buggyProject)) {
                     continue;
                 }
-                executorService.submit(new Runner(repoPath, projectName, bugId, INSTRUMENTATION_TIMEOUT, buggyProject,
+                executorService.submit(new DataSetCreationRunner(repoPath, projectName, bugId, INSTRUMENTATION_TIMEOUT, buggyProject,
                         pathConfiguration.getBugPath(projectName, String.valueOf(bugId)), originalProjectPath));
                 bugId++;
             }

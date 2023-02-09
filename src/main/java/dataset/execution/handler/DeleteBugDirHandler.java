@@ -8,6 +8,11 @@ import java.io.IOException;
 
 public class DeleteBugDirHandler extends Handler {
     private final String dirToDelete;
+    public DeleteBugDirHandler(String dirToDelete) {
+        super(new BaseHandler());
+        this.dirToDelete = dirToDelete;
+    }
+
     public DeleteBugDirHandler(Handler nextHandler, String dirToDelete) {
         super(nextHandler);
         this.dirToDelete = dirToDelete;

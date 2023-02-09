@@ -21,9 +21,10 @@ public class TraceCollectionHandler extends Handler {
         // do trace collection for working and buggy
         try {
             traceCreator.run();
-            return true;
         } catch (RuntimeException e) {
-            return false;
+            e.printStackTrace();
+        } finally {
+            return true;
         }
     }
 }
