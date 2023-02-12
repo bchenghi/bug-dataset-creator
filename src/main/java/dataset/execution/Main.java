@@ -27,9 +27,9 @@ import static dataset.constants.FileNames.WORKING_PROJECT_DIR;
 public class Main {
     private static final int INSTRUMENTATION_TIMEOUT = 5;
     public static void main(String[] args) throws InterruptedException {
-        final String projectName = "commons-pool";
+        final String projectName = "github-api";
         final String repoPath = "D:\\chenghin\\NUS";
-        String originalProjectPath = "D:\\chenghin\\commons-pool";
+        String originalProjectPath = "D:\\chenghin\\github-api";
         runBugDataCollection(repoPath, projectName, originalProjectPath);
     }
 
@@ -49,7 +49,7 @@ public class Main {
 
     private static void runBugDataCollection(String repoPath, String projectName, String originalProjectPath) {
         MutationFrameworkPathConfiguration pathConfiguration = new MutationFrameworkPathConfiguration(repoPath);
-        int numOfCores = 2;
+        int numOfCores = 1;
         MutationFrameworkConfigBuilder configBuilder = new MutationFrameworkConfigBuilder();
         configBuilder.setProjectPath(originalProjectPath);
         MutationFrameworkConfig mutationFrameworkConfig = configBuilder.build();
