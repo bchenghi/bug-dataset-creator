@@ -28,11 +28,12 @@ class BugDatasetTest {
     private static final String ZIPPED_BUG_1 = UNZIPPED_BUG_1 + ".zip";
     private static final String UNZIPPED_BUG_2 = String.join(File.separator, REPO_PATH, PROJECT_NAME, "2");
     private static final String ZIPPED_BUG_2 = UNZIPPED_BUG_2 + ".zip";
-    private static final String EXPECTED_BUG_2 = String.join(File.separator, REPO_PATH, PROJECT_NAME, "expected-2");
+    private static final String EXPECTED_BUG_2 = String.join(File.separator, REPO_PATH, PROJECT_NAME,
+            "expected-2");
+    private BugDataset bugDataset;
     
     @Test
     void zip_bugDirProvided_zipsCorrectly() throws IOException {
-        BugDataset bugDataset = new BugDataset(REPO_PATH, PROJECT_NAME);
         bugDataset.zip(1);
         assertTrue(new File(ZIPPED_BUG_1).exists());
         assertFalse(new File(UNZIPPED_BUG_1).exists());
@@ -48,7 +49,6 @@ class BugDatasetTest {
     
     @Test
     void unzip_zippedBugDirProvided_unzipsCorrectly() throws IOException {
-        BugDataset bugDataset = new BugDataset(REPO_PATH, PROJECT_NAME);
         bugDataset.unzip(2);
         TestUtils.dirsAreEqual(EXPECTED_BUG_2, UNZIPPED_BUG_2);
         assertFalse(new File(ZIPPED_BUG_2).exists());
@@ -56,7 +56,6 @@ class BugDatasetTest {
     
     @Test
     void getData_bugDirProvided_getsCorrectData() throws IOException {
-        BugDataset bugDataset = new BugDataset(REPO_PATH, PROJECT_NAME);
         BugData data = bugDataset.getData(1);
         assertTrue(data.getBuggyTrace().size() > 0);
         assertTrue(data.getWorkingTrace().size() > 0);
@@ -72,7 +71,6 @@ class BugDatasetTest {
     // This one is a system test, we could put it in its own file
     @Test
     void setClassPathsToBreakpoints_traceFilesProvided_allTraceNodesGetsJavaPath() throws IOException {
-        BugDataset bugDataset = new BugDataset(REPO_PATH, PROJECT_NAME);
         BugData data = bugDataset.getData(1);
         ProjectMinimizer minimizer = bugDataset.createMinimizer(1);
         minimizer.maximise();
@@ -83,32 +81,43 @@ class BugDatasetTest {
     }
 
     @Test
-    void getData_bugDirMissingTraceFile_throwsFileNotFoundException() throws IOException {
-        BugDataset bugDataset = new BugDataset(REPO_PATH, PROJECT_NAME);
+    void getData_bugDirMissingTraceFile_throwsFileNotFoundException() {
         assertThrows(IOException.class, () -> bugDataset.getData(3));
     }
     
     
     @Test
-    void getData_bugDirMissingRootCauseFile_throwsFileNotFoundException() throws IOException {
-        BugDataset bugDataset = new BugDataset(REPO_PATH, PROJECT_NAME);
+    void getData_bugDirMissingRootCauseFile_throwsFileNotFoundException() {
         assertThrows(IOException.class, () -> bugDataset.getData(4));
     }
     
     @Test
-    void exists_dirDoesNotExist_returnsFalse() throws IOException {
-        BugDataset bugDataset = new BugDataset(REPO_PATH, PROJECT_NAME);
+    void exists_dirDoesNotExist_returnsFalse() {
         assertFalse(bugDataset.exists(10, false));
     }
     
     @Test
-    void exists_dirExists_returnsTrue() throws IOException {
-        BugDataset bugDataset = new BugDataset(REPO_PATH, PROJECT_NAME);
+    void exists_dirExists_returnsTrue() {
         assertTrue(bugDataset.exists(1, false));
+    }
+
+    @Test
+    void getDataWithTraceCollection_zippedBugDirWithoutTraces_getsData() throws IOException {
+        BugData data = bugDataset.getDataWithTraceCollection(5, 1);
+        assertTrue(data.getBuggyTrace().size() > 0);
+        assertTrue(data.getWorkingTrace().size() > 0);
+        assertEquals(7, data.getRootCauseNode());
+        assertEquals(PROJECT_NAME, data.getProjectName());
+        TestCase expectedTestCase = new TestCase("org.apache.commons.math.analysis.ComposableFunctionTest",
+                "testComposition", "org.apache.commons.math.analysis.ComposableFunctionTest#testComposition(),54,102");
+        assertEquals(expectedTestCase.testClassName(), data.getTestCase().testClassName());
+        assertEquals(expectedTestCase.testMethodName(), data.getTestCase().testMethodName());
+        assertEquals(expectedTestCase.toString(), data.getTestCase().toString());
     }
 
     @BeforeEach
     void beforeEach() throws IOException {
+        bugDataset = new BugDataset(REPO_PATH, PROJECT_NAME);
         clean();
     }
     @AfterEach

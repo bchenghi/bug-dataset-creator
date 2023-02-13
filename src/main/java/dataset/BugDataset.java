@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import dataset.trace.TraceCreator;
 import org.apache.commons.io.FileUtils;
 
 import dataset.bug.creator.BuggyProjectCreator;
@@ -130,6 +131,19 @@ public class BugDataset {
         } catch (NoSuchFileException e) {
             throw new IOException(e);
         }
+    }
+
+    /**
+     * Gets bug data from a given bug Id dir
+     * @param bugId
+     * @param timeout Timeout for trace collection in minutes
+     * @return
+     * @throws IOException
+     */
+    public BugData getDataWithTraceCollection(int bugId, int timeout) throws IOException {
+        TraceCreator traceCreator = new TraceCreator(new File(repoPath).getCanonicalPath(), projectName, bugId, timeout);
+        traceCreator.run();
+        return getData(bugId);
     }
     
     private int getRootCauseNode(RootCause rootCause, Trace workingTrace) {
