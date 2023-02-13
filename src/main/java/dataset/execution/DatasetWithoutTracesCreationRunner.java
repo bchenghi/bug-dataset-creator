@@ -2,7 +2,6 @@ package dataset.execution;
 
 import dataset.bug.creator.BuggyProjectCreator;
 import dataset.bug.model.BuggyProject;
-import dataset.execution.handler.BugCheckHandler;
 import dataset.execution.handler.BuggyProjectCreationHandler;
 import dataset.execution.handler.DeleteBugDirHandler;
 import dataset.execution.handler.Handler;

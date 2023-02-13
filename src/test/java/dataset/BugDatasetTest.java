@@ -19,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import dataset.BugDataset.BugData;
+import org.junit.jupiter.api.condition.DisabledIf;
 
 class BugDatasetTest {
     private static final String FILE_ROOT = String.join(File.separator, "src", "test", "files", "dataset");
@@ -102,6 +103,7 @@ class BugDatasetTest {
     }
 
     @Test
+    @DisabledIf("dataset.TestUtils#isRunningInGitHubActions")
     void getDataWithTraceCollection_zippedBugDirWithoutTraces_getsData() throws IOException {
         BugData data = bugDataset.getDataWithTraceCollection(5, 1);
         assertTrue(data.getBuggyTrace().size() > 0);
