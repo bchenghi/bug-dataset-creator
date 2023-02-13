@@ -9,6 +9,7 @@ import jmutation.model.project.ProjectConfig;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeoutException;
 
@@ -43,39 +44,32 @@ public class TraceCollector implements Callable<ExecutionResult> {
         this.instrumentationTimeout = timeout;
     }
 
-    public TraceCollector(ProjectConfig projectConfig, TestCase testCase, String precheckDumpFilePath,
-            String traceDumpFilePath, String traceWithAssertsDumpFilePath) {
-        microbatConfig = MicrobatConfig.defaultConfig(projectConfig.getProjectPath());
-        this.projectConfig = projectConfig;
-        this.testCase = testCase;
-        this.precheckDumpFilePath = precheckDumpFilePath;
-        this.traceDumpFilePath = traceDumpFilePath;
-        this.traceWithAssertsDumpFilePath = traceWithAssertsDumpFilePath;
-    }
 
     public ExecutionResult call() throws TimeoutException {
+        Optional<PrecheckExecutionResult> precheckExecutionResultOptional = executePrecheck();
+        if (precheckExecutionResultOptional.isEmpty()) {
+            System.out.println("precheckExecutionResult was null");
+            return null;
+        }
+        PrecheckExecutionResult precheckExecutionResult = precheckExecutionResultOptional.get();
+        return executeTraceCollection(precheckExecutionResult.getTotalSteps());
+    }
+
+    public Optional<PrecheckExecutionResult> executePrecheck() {
         MicrobatConfig updatedMicrobatConfig = microbatConfig.setDumpFilePath(precheckDumpFilePath);
         ProjectExecutor projectExecutor = new ProjectExecutor(updatedMicrobatConfig, projectConfig);
         PrecheckExecutionResult precheckExecutionResult = projectExecutor.execPrecheck(testCase);
         if (precheckExecutionResult == null) {
             System.out.println("precheckExecutionResult was null");
-            return null;
+            return Optional.empty();
         }
-        updatedMicrobatConfig = microbatConfig.setDumpFilePath(traceDumpFilePath).setExpectedSteps(precheckExecutionResult.getTotalSteps());
-        projectExecutor = projectExecutor.setMicrobatConfig(updatedMicrobatConfig);
-        ExecutionResult result = projectExecutor.exec(testCase, false, instrumentationTimeout);
-        if (traceWithAssertsDumpFilePath == null) {
-            return result;
-        }
-        MicrobatConfig includeAssertionsMutationMicrobatConfig = addAssertionsToMicrobatConfig(updatedMicrobatConfig);
-        includeAssertionsMutationMicrobatConfig =
-                includeAssertionsMutationMicrobatConfig.setDumpFilePath(traceWithAssertsDumpFilePath);
-        projectExecutor.setMicrobatConfig(includeAssertionsMutationMicrobatConfig);
-        return projectExecutor.exec(testCase, false);
+        return Optional.of(precheckExecutionResult);
     }
 
-    private MicrobatConfig addAssertionsToMicrobatConfig(MicrobatConfig config) {
-        String[] assertionsArr = new String[]{"org.junit.Assert", "org.junit.jupiter.api.Assertions", "org.testng.Assert"};
-        return config.setIncludes(Arrays.asList(assertionsArr));
+    public ExecutionResult executeTraceCollection(int expectedSteps) throws TimeoutException {
+        MicrobatConfig updatedMicrobatConfig = microbatConfig.setDumpFilePath(traceDumpFilePath).setExpectedSteps(
+                expectedSteps);
+        ProjectExecutor projectExecutor = new ProjectExecutor(updatedMicrobatConfig, projectConfig);
+        return projectExecutor.exec(testCase, false, instrumentationTimeout);
     }
 }

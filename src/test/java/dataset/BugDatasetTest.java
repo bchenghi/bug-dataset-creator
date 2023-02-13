@@ -60,10 +60,10 @@ class BugDatasetTest {
         BugData data = bugDataset.getData(1);
         assertTrue(data.getBuggyTrace().size() > 0);
         assertTrue(data.getWorkingTrace().size() > 0);
-        assertEquals(3, data.getRootCauseNode());
+        assertEquals(7, data.getRootCauseNode());
         assertEquals(PROJECT_NAME, data.getProjectName());
-        TestCase expectedTestCase = new TestCase("org.apache.commons.math.analysis.BinaryFunctionTest",
-                "testAdd", "org.apache.commons.math.analysis.BinaryFunctionTest#testAdd(),24,28");
+        TestCase expectedTestCase = new TestCase("org.apache.commons.math.analysis.ComposableFunctionTest",
+                "testComposition", "org.apache.commons.math.analysis.ComposableFunctionTest#testComposition(),54,102");
         assertEquals(expectedTestCase.testClassName(), data.getTestCase().testClassName());
         assertEquals(expectedTestCase.testMethodName(), data.getTestCase().testMethodName());
         assertEquals(expectedTestCase.toString(), data.getTestCase().toString());

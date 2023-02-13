@@ -26,7 +26,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static dataset.constants.FileNames.BUGGY_PROJECT_DIR;
-import static dataset.constants.FileNames.WORKING_PROJECT_DIR;
 
 public class BuggyProjectCreator implements Callable<Boolean> {
     private static final Logger logger = Log.createLogger(BuggyProjectCreator.class);
@@ -108,22 +107,6 @@ public class BuggyProjectCreator implements Callable<Boolean> {
         }
     }
 
-    private boolean minimize(String buggyProjectPath, int bugId) {
-        ProjectMinimizer minimizer = createMinimizer(buggyProjectPath, bugId);
-        return minimizer.minimize();
-    }
-
-    private ProjectMinimizer createMinimizer(String buggyProjectPath, int bugId) {
-        PathConfiguration pathConfiguration = new MutationFrameworkPathConfiguration(repositoryPath);
-        String projectName = projectPath.substring(projectPath.lastIndexOf(File.separator) + 1);
-        String metadataPath = pathConfiguration.getRelativeMetadataPath(projectName, Integer.toString(bugId));
-        buggyProjectPath.substring(repositoryPath.length());
-        return new ProjectMinimizer(repositoryPath, String.join(File.separator,
-                buggyProject.projectName(), Integer.toString(bugId), BUGGY_PROJECT_DIR),
-                String.join(File.separator, buggyProject.projectName(), WORKING_PROJECT_DIR),
-                metadataPath);
-    }
-
     private void log(int bugId, String msg) {
         logger.info(bugId + ": " + msg);
     }    
@@ -132,28 +115,39 @@ public class BuggyProjectCreator implements Callable<Boolean> {
         logger.log(level, bugId + ": " + msg);
     }
 
-    private MutationFrameworkConfig createMutationFrameworkConfig(String mutatedProjPathStr) {
+    MutationFrameworkConfig createMutationFrameworkConfig(String mutatedProjPathStr) {
         StringBuilder mutatedProjPath = new StringBuilder(mutatedProjPathStr);
         MutationFrameworkConfigBuilder configBuilder = new MutationFrameworkConfigBuilder();
         configBuilder.setProjectPath(projectPath);
         configBuilder.setMutator(new HeuristicMutator());
-        DumpFilePathConfig dumpFilePathConfig = new DumpFilePathConfig();
-        dumpFilePathConfig.setMutatedPrecheckFilePath(mutatedProjPath +
-                DumpFilePathConfig.DEFAULT_BUGGY_PRECHECK_FILE);
-        dumpFilePathConfig.setMutatedTraceFilePath(mutatedProjPath +
-                DumpFilePathConfig.DEFAULT_BUGGY_TRACE_FILE);
+        DumpFilePathConfig dumpFilePathConfig = createDumpFilePathConfig(mutatedProjPath.toString());
+        configBuilder.setDumpFilePathConfig(dumpFilePathConfig);
         int mutatedBugPathLen = mutatedProjPath.length();
+        mutatedProjPath.append(File.separator);
         mutatedProjPath.append(BUGGY_PROJECT_DIR);
         configBuilder.setMutatedProjectPath(mutatedProjPath.toString());
         mutatedProjPath.delete(mutatedBugPathLen, mutatedBugPathLen + 3);
         return configBuilder.build();
     }
 
+    DumpFilePathConfig createDumpFilePathConfig(String mutatedProjPath) {
+        String mutatedProjPathWithSeparator = mutatedProjPath + File.separator;
+        DumpFilePathConfig dumpFilePathConfig = new DumpFilePathConfig();
+        dumpFilePathConfig.setMutatedPrecheckFilePath(mutatedProjPathWithSeparator +
+                DumpFilePathConfig.DEFAULT_BUGGY_PRECHECK_FILE);
+        dumpFilePathConfig.setMutatedTraceFilePath(mutatedProjPathWithSeparator +
+                DumpFilePathConfig.DEFAULT_BUGGY_TRACE_FILE);
+        dumpFilePathConfig.setTraceFilePath(mutatedProjPathWithSeparator +
+                DumpFilePathConfig.DEFAULT_TRACE_FILE);
+        dumpFilePathConfig.setPrecheckFilePath(mutatedProjPathWithSeparator +
+                DumpFilePathConfig.DEFAULT_PRECHECK_FILE);
+        return dumpFilePathConfig;
+    }
+
     private String createMutatedProjectPath(int currBugId) {
         StringBuilder mutatedProjPath = new StringBuilder(repositoryPath + File.separator +
                 buggyProject.projectName() + File.separator);
         mutatedProjPath.append(currBugId);
-        mutatedProjPath.append(File.separator);
         return mutatedProjPath.toString();
     }
 

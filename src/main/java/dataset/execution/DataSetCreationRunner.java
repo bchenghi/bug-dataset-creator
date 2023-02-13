@@ -22,9 +22,10 @@ public class DataSetCreationRunner implements Runnable {
      * 1. Create buggy project in repo/projName/bugId/bug
      * 2. Collect working and buggy trace
      * 3. Check if traces were collected successfully
-     * 4a. Delete dir if trace collection failed, and return
+     * 4a. If trace collection failed, delete the dir and return
      * 4b. Else do nothing
-     * 5. Zip the repo/projName/bugId dir
+     * 5. Minimize repo/projName/bugId/bug dir
+     * 6. Zip the repo/projName/bugId dir
      * @param repoPath
      * @param projectName
      * @param bugId
@@ -33,7 +34,8 @@ public class DataSetCreationRunner implements Runnable {
      * @param pathToBugDir
      */
     public DataSetCreationRunner(String repoPath, String projectName, int bugId, int instrumentationTimeout,
-                                 BuggyProject buggyProject, String pathToBugDir, String pathToOriginalProj) {
+                                 BuggyProject buggyProject, String pathToBugDir, String pathToOriginalProj,
+                                 int buggySteps, int workingSteps) {
 
         deleteBugDirHandler = new DeleteBugDirHandler(pathToBugDir);
 
@@ -41,7 +43,7 @@ public class DataSetCreationRunner implements Runnable {
         MinimizeHandler minimizeHandler = new MinimizeHandler(zipBugDirHandler, repoPath, projectName, bugId);
         BugCheckHandler checkHandler = new BugCheckHandler(minimizeHandler, repoPath, projectName, bugId);
         TraceCollectionHandler traceHandler = new TraceCollectionHandler(checkHandler, repoPath,
-                projectName, bugId, instrumentationTimeout);
+                projectName, bugId, instrumentationTimeout, buggySteps, workingSteps);
 
         BuggyProjectCreationHandler buggyProjectCreationHandler =
                 new BuggyProjectCreationHandler(traceHandler, new BuggyProjectCreator(repoPath,

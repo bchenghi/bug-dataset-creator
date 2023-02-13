@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import dataset.bug.model.BuggyProject;
 import dataset.bug.model.path.MutationFrameworkPathConfiguration;
@@ -16,6 +18,8 @@ import jmutation.model.TestCase;
 import jmutation.model.mutation.MutationFrameworkConfig;
 import jmutation.model.mutation.MutationFrameworkConfig.MutationFrameworkConfigBuilder;
 import jmutation.mutation.MutationCommand;
+import jmutation.mutation.heuristic.HeuristicMutator;
+import jmutation.mutation.heuristic.parser.StrongMutationParser;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,9 +31,9 @@ import static dataset.constants.FileNames.WORKING_PROJECT_DIR;
 public class Main {
     private static final int INSTRUMENTATION_TIMEOUT = 5;
     public static void main(String[] args) throws InterruptedException {
-        final String projectName = "github-api";
+        final String projectName = "math_70";
         final String repoPath = "D:\\chenghin\\NUS";
-        String originalProjectPath = "D:\\chenghin\\github-api";
+        String originalProjectPath = "D:\\chenghin\\projects\\" + projectName;
         runBugDataCollection(repoPath, projectName, originalProjectPath);
     }
 
@@ -47,11 +51,18 @@ public class Main {
         System.out.println(count);
     }
 
+    /**
+     *
+     * @param repoPath
+     * @param projectName
+     * @param originalProjectPath
+     */
     private static void runBugDataCollection(String repoPath, String projectName, String originalProjectPath) {
         MutationFrameworkPathConfiguration pathConfiguration = new MutationFrameworkPathConfiguration(repoPath);
         int numOfCores = 1;
         MutationFrameworkConfigBuilder configBuilder = new MutationFrameworkConfigBuilder();
         configBuilder.setProjectPath(originalProjectPath);
+        configBuilder.setMutator(new HeuristicMutator(new StrongMutationParser()));
         MutationFrameworkConfig mutationFrameworkConfig = configBuilder.build();
         MutationFrameworkBuilder mutationFrameworkBuilder = new MutationFrameworkBuilder(mutationFrameworkConfig);
         MutationFramework mutationFramework = mutationFrameworkBuilder.build();
@@ -60,27 +71,39 @@ public class Main {
         ExecutorService executorService = Executors.newFixedThreadPool(numOfCores);
         List<TestCase> testCaseList = mutationFramework.getTestCases();
         JSONObject storedProjects = getStoredProjects(pathConfiguration.getStoragePath(projectName));
-        int bugId = 466;
+        int bugId = getLargestBugIdValue(repoPath, projectName) + 1;
         for (TestCase testCase : testCaseList) {
             mutationFramework.setTestCase(testCase);
             List<MutationCommand> commands;
             try {
+                /**
+                 * If we use multi-threading,
+                 * rmb to set the precheck dump file to different location each time before running runPrecheck
+                 */
                 PrecheckExecutionResult precheckExecutionResult = mutationFramework.runPrecheck();
                 if (!precheckExecutionResult.testCasePassed()) continue;
                 commands = mutationFramework.analyse(precheckExecutionResult.getCoverage());
+                for (int i = 0; i < commands.size(); i++) {
+                    MutationCommand command = commands.get(i);
+                    BuggyProject buggyProject = new BuggyProject(testCase, command, projectName);
+                    if (checkBuggyProjectAlreadyCloned(storedProjects, buggyProject)) {
+                        continue;
+                    }
+                    /**
+                     * The number of buggy steps is not correct,
+                     * but currently unsure of how to get it from the mutation handler
+                     */
+                    new DataSetCreationRunner(repoPath, projectName, bugId, INSTRUMENTATION_TIMEOUT, buggyProject,
+                            pathConfiguration.getBugPath(projectName, String.valueOf(bugId)), originalProjectPath,
+                            precheckExecutionResult.getTotalSteps(), precheckExecutionResult.getTotalSteps()).run();
+                    return;
+//                executorService.submit(new DataSetCreationRunner(repoPath, projectName, bugId, INSTRUMENTATION_TIMEOUT, buggyProject,
+//                        pathConfiguration.getBugPath(projectName, String.valueOf(bugId)), originalProjectPath));
+//                bugId++;
+                }
             } catch (RuntimeException e) {
                 e.printStackTrace();
                 continue;
-            }
-            for (int i = 0; i < commands.size(); i++) {
-                MutationCommand command = commands.get(i);
-                BuggyProject buggyProject = new BuggyProject(testCase, command, projectName);
-                if (checkBuggyProjectAlreadyCloned(storedProjects, buggyProject)) {
-                    continue;
-                }
-                executorService.submit(new DataSetCreationRunner(repoPath, projectName, bugId, INSTRUMENTATION_TIMEOUT, buggyProject,
-                        pathConfiguration.getBugPath(projectName, String.valueOf(bugId)), originalProjectPath));
-                bugId++;
             }
         }
         executorService.shutdown();
@@ -104,5 +127,24 @@ public class Main {
             e.printStackTrace();
             throw new RuntimeException("Failed to clone project to " + workingDir.getAbsolutePath());
         }
+    }
+
+    private static int getLargestBugIdValue(String repoPath, String projectName) {
+        List<String> buggyDirs = Stream.of(new File(repoPath, projectName).listFiles())
+                .filter(file -> !file.isDirectory())
+                .map(File::getName)
+                .collect(Collectors.toList());
+        int maxBugId = 0;
+        for (String buggyDir : buggyDirs) {
+            int currBugId;
+            try {
+                currBugId = Integer.parseInt(buggyDir);
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+                continue;
+            }
+            if (currBugId > maxBugId) maxBugId = currBugId;
+        }
+        return maxBugId;
     }
 }

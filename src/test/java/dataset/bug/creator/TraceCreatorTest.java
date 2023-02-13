@@ -53,6 +53,16 @@ class TraceCreatorTest {
     }
 
     @Test
+    void runTraceCollection_correctState_createsTraces() throws IOException {
+        TraceCreator creator = new TraceCreator(new File(REPO_PATH).getCanonicalPath(), PROJECT_NAME, 1);
+        creator.runTraceCollection(8, 8);
+        for (String filePath : TRACE_FILE_PATHS) {
+            File file = new File(filePath);
+            assertTrue(file.exists());
+        }
+    }
+
+    @Test
     void isDone_tracesArePresent_returnsTrue() throws IOException {
         TraceCreator creator = new TraceCreator(new File(REPO_PATH).getCanonicalPath(), PROJECT_NAME, 2);
         assertTrue(creator.isDone());
