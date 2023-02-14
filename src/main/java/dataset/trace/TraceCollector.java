@@ -55,10 +55,11 @@ public class TraceCollector implements Callable<ExecutionResult> {
         return executeTraceCollection(precheckExecutionResult.getTotalSteps());
     }
 
-    public Optional<PrecheckExecutionResult> executePrecheck() {
+    public Optional<PrecheckExecutionResult> executePrecheck() throws TimeoutException {
         MicrobatConfig updatedMicrobatConfig = microbatConfig.setDumpFilePath(precheckDumpFilePath);
         ProjectExecutor projectExecutor = new ProjectExecutor(updatedMicrobatConfig, projectConfig);
-        PrecheckExecutionResult precheckExecutionResult = projectExecutor.execPrecheck(testCase);
+        PrecheckExecutionResult precheckExecutionResult = projectExecutor.execPrecheck(testCase, false,
+                instrumentationTimeout);
         if (precheckExecutionResult == null) {
             System.out.println("precheckExecutionResult was null");
             return Optional.empty();
