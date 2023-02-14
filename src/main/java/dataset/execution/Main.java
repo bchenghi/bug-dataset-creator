@@ -31,8 +31,8 @@ import static dataset.constants.FileNames.WORKING_PROJECT_DIR;
 
 
 public class Main {
-    private static final int INSTRUMENTATION_TIMEOUT = 5;
-    public static void main(String[] args) throws InterruptedException {
+    private static final int INSTRUMENTATION_TIMEOUT = 1;
+    public static void main(String[] args) {
         final String projectName = "secor";
         final String repoPath = "D:\\chenghin\\NUS";
         String originalProjectPath = "D:\\chenghin\\projects\\" + projectName;
@@ -99,7 +99,8 @@ public class Main {
 //                            pathConfiguration.getBugPath(projectName, String.valueOf(bugId)), originalProjectPath,
 //                            precheckExecutionResult.getTotalSteps(), precheckExecutionResult.getTotalSteps()).run();
                     new DatasetWithoutTracesCreationRunner(repoPath, projectName, bugId, buggyProject,
-                            pathConfiguration.getBugPath(projectName, String.valueOf(bugId)), originalProjectPath).run();
+                            pathConfiguration.getBugPath(projectName, String.valueOf(bugId)), originalProjectPath,
+                            INSTRUMENTATION_TIMEOUT).run();
 //                executorService.submit(new DataSetCreationRunner(repoPath, projectName, bugId, INSTRUMENTATION_TIMEOUT, buggyProject,
 //                        pathConfiguration.getBugPath(projectName, String.valueOf(bugId)), originalProjectPath));
                     bugId++;

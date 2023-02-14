@@ -16,7 +16,7 @@ public class DatasetWithoutTracesCreationRunner implements Runnable {
     private final Handler deleteBugDirHandler;
     private final Handler startHandler;
     public DatasetWithoutTracesCreationRunner(String repoPath, String projectName, int bugId,
-                                 BuggyProject buggyProject, String pathToBugDir, String pathToOriginalProj) {
+                                 BuggyProject buggyProject, String pathToBugDir, String pathToOriginalProj, int timeout) {
 
         deleteBugDirHandler = new DeleteBugDirHandler(pathToBugDir);
         ZipBugDirHandler zipBugDirHandler = new ZipBugDirHandler(pathToBugDir);
@@ -24,7 +24,8 @@ public class DatasetWithoutTracesCreationRunner implements Runnable {
         BuggyProjectCreationHandler buggyProjectCreationHandler =
                 new BuggyProjectCreationHandler(minimizeHandler, new BuggyProjectCreator(repoPath,
                         pathToOriginalProj, buggyProject,
-                        repoPath + File.separator + CREATED_BUGGY_PROJECT_FILE, bugId));
+                        String.join(File.separator, repoPath, projectName, CREATED_BUGGY_PROJECT_FILE),
+                        bugId, timeout));
         startHandler = buggyProjectCreationHandler;
     }
 

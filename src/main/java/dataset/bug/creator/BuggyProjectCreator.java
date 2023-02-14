@@ -38,6 +38,7 @@ public class BuggyProjectCreator implements Callable<Boolean> {
     private final int bugId;
     public static final String ROOTCAUSE_FILE_NAME = "rootcause.txt";
     public static final String TESTCASE_FILE_NAME = "testcase.txt";
+    private final int timeoutMinutes;
 
     public BuggyProjectCreator(String repositoryPath, String projectPath, BuggyProject buggyProject,
                                String storageFilePath, int bugId) {
@@ -46,6 +47,17 @@ public class BuggyProjectCreator implements Callable<Boolean> {
         this.buggyProject = buggyProject;
         this.storageFilePath = storageFilePath;
         this.bugId = bugId;
+        this.timeoutMinutes = 0;
+    }
+
+    public BuggyProjectCreator(String repositoryPath, String projectPath, BuggyProject buggyProject,
+                               String storageFilePath, int bugId, int timeoutMinutes) {
+        this.repositoryPath = repositoryPath;
+        this.projectPath = projectPath;
+        this.buggyProject = buggyProject;
+        this.storageFilePath = storageFilePath;
+        this.bugId = bugId;
+        this.timeoutMinutes = timeoutMinutes;
     }
 
     private static void createFile(String contents, String pathToFile, String fileName) {
@@ -128,6 +140,7 @@ public class BuggyProjectCreator implements Callable<Boolean> {
         mutatedProjPath.append(BUGGY_PROJECT_DIR);
         configBuilder.setMutatedProjectPath(mutatedProjPath.toString());
         mutatedProjPath.delete(mutatedBugPathLen, mutatedBugPathLen + 3);
+        configBuilder.setInstrumentationTimeout(timeoutMinutes);
         return configBuilder.build();
     }
 
