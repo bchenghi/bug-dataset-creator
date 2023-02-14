@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -103,7 +104,7 @@ public class Main {
 //                        pathConfiguration.getBugPath(projectName, String.valueOf(bugId)), originalProjectPath));
                     bugId++;
                 }
-            } catch (RuntimeException e) {
+            } catch (RuntimeException | TimeoutException e) {
                 e.printStackTrace();
             }
         }
