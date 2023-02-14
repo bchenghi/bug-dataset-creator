@@ -21,6 +21,7 @@ import jmutation.mutation.MutationCommand;
 import jmutation.mutation.heuristic.HeuristicMutator;
 import jmutation.mutation.heuristic.parser.StrongMutationParser;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -31,7 +32,7 @@ import static dataset.constants.FileNames.WORKING_PROJECT_DIR;
 public class Main {
     private static final int INSTRUMENTATION_TIMEOUT = 5;
     public static void main(String[] args) throws InterruptedException {
-        final String projectName = "math_70";
+        final String projectName = "secor";
         final String repoPath = "D:\\chenghin\\NUS";
         String originalProjectPath = "D:\\chenghin\\projects\\" + projectName;
         runBugDataCollection(repoPath, projectName, originalProjectPath);
@@ -93,17 +94,17 @@ public class Main {
                      * The number of buggy steps is not correct,
                      * but currently unsure of how to get it from the mutation handler
                      */
-                    new DataSetCreationRunner(repoPath, projectName, bugId, INSTRUMENTATION_TIMEOUT, buggyProject,
-                            pathConfiguration.getBugPath(projectName, String.valueOf(bugId)), originalProjectPath,
-                            precheckExecutionResult.getTotalSteps(), precheckExecutionResult.getTotalSteps()).run();
-                    return;
+//                    new DataSetCreationRunner(repoPath, projectName, bugId, INSTRUMENTATION_TIMEOUT, buggyProject,
+//                            pathConfiguration.getBugPath(projectName, String.valueOf(bugId)), originalProjectPath,
+//                            precheckExecutionResult.getTotalSteps(), precheckExecutionResult.getTotalSteps()).run();
+                    new DatasetWithoutTracesCreationRunner(repoPath, projectName, bugId, buggyProject,
+                            pathConfiguration.getBugPath(projectName, String.valueOf(bugId)), originalProjectPath).run();
 //                executorService.submit(new DataSetCreationRunner(repoPath, projectName, bugId, INSTRUMENTATION_TIMEOUT, buggyProject,
 //                        pathConfiguration.getBugPath(projectName, String.valueOf(bugId)), originalProjectPath));
-//                bugId++;
+                    bugId++;
                 }
             } catch (RuntimeException e) {
                 e.printStackTrace();
-                continue;
             }
         }
         executorService.shutdown();
@@ -138,7 +139,7 @@ public class Main {
         for (String buggyDir : buggyDirs) {
             int currBugId;
             try {
-                currBugId = Integer.parseInt(buggyDir);
+                currBugId = Integer.parseInt(FilenameUtils.removeExtension(buggyDir));
             } catch (NumberFormatException e) {
                 e.printStackTrace();
                 continue;

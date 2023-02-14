@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -83,7 +84,7 @@ public class BuggyProjectCreator implements Callable<Boolean> {
             log(bugId, "Created testcase and rootcause files. Writing to storage file.");
             writeToStorageFile();
             log(bugId, "Written to storage file");
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | TimeoutException e) {
             e.printStackTrace();
             return false;
         }
