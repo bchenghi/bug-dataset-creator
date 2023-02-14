@@ -14,13 +14,13 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Cache dependencies
-          id: maven
-          uses: actions/cache@v3
-          env:
-            cache-name: cache-dependencies
-          with:
-            path: ~/.m2/repository
-            key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/pom.xml', '**/java-mutation-framework-0.0.1-SNAPSHOT.jar') }}
+        id: maven
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-dependencies
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/pom.xml', '**/java-mutation-framework-0.0.1-SNAPSHOT.jar') }}
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
