@@ -9,6 +9,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.Parameter;
 import dataset.bug.model.BuggyProject;
 import dataset.bug.model.path.MutationFrameworkPathConfiguration;
 import dataset.execution.handler.BugCheckHandler;
@@ -31,12 +33,20 @@ import static dataset.constants.FileNames.WORKING_PROJECT_DIR;
 
 
 public class Main {
-    private static final int INSTRUMENTATION_TIMEOUT = 1;
+    @Parameter(names = "-timeout")
+    private int instrumentationTimeout = 0;
+
+    @Parameter(names = "-projectName", required = true)
+    private String projectName;
+    @Parameter(names = "-repoPath", required = true)
+    private String repoPath;
+    @Parameter(names = "-projectPath", required = true)
+    private String projectPath;
+
     public static void main(String[] args) {
-        final String projectName = "secor";
-        final String repoPath = "D:\\chenghin\\NUS";
-        String originalProjectPath = "D:\\chenghin\\projects\\" + projectName;
-        runBugDataCollection(repoPath, projectName, originalProjectPath);
+        Main params = new Main();
+        JCommander.newBuilder().addObject(params).build().parse(args);
+        runBugDataCollection(params.repoPath, params.projectName, params.projectPath, params.instrumentationTimeout);
     }
 
     private static void checkDone(String repoPath, String projectName, List<Integer> bugIds) {
@@ -59,7 +69,8 @@ public class Main {
      * @param projectName
      * @param originalProjectPath
      */
-    private static void runBugDataCollection(String repoPath, String projectName, String originalProjectPath) {
+    private static void runBugDataCollection(String repoPath, String projectName, String originalProjectPath,
+                                             int instrumentationTimeout) {
         MutationFrameworkPathConfiguration pathConfiguration = new MutationFrameworkPathConfiguration(repoPath);
         int numOfCores = 1;
         MutationFrameworkConfigBuilder configBuilder = new MutationFrameworkConfigBuilder();
@@ -95,14 +106,9 @@ public class Main {
                      * The number of buggy steps is not correct,
                      * but currently unsure of how to get it from the mutation handler
                      */
-//                    new DataSetCreationRunner(repoPath, projectName, bugId, INSTRUMENTATION_TIMEOUT, buggyProject,
-//                            pathConfiguration.getBugPath(projectName, String.valueOf(bugId)), originalProjectPath,
-//                            precheckExecutionResult.getTotalSteps(), precheckExecutionResult.getTotalSteps()).run();
                     new DatasetWithoutTracesCreationRunner(repoPath, projectName, bugId, buggyProject,
                             pathConfiguration.getBugPath(projectName, String.valueOf(bugId)), originalProjectPath,
-                            INSTRUMENTATION_TIMEOUT).run();
-//                executorService.submit(new DataSetCreationRunner(repoPath, projectName, bugId, INSTRUMENTATION_TIMEOUT, buggyProject,
-//                        pathConfiguration.getBugPath(projectName, String.valueOf(bugId)), originalProjectPath));
+                            instrumentationTimeout).run();
                     bugId++;
                 }
             } catch (RuntimeException | TimeoutException e) {
