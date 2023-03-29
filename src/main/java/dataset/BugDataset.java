@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import dataset.bug.model.path.PathConfiguration;
 import dataset.execution.Request;
 import dataset.execution.handler.TraceCollectionHandler;
 import dataset.trace.TraceCreator;
@@ -47,7 +46,7 @@ public class BugDataset {
 
     public static void main(String[] args) throws IOException {
         int largestBugId = 17426;
-        String repoPath = "D:\\chenghin\\NUS"; // To modify according to system
+        String repoPath = "E:\\chenghin";
         String projName = "math_70";
         int traceCollectionTimeoutSeconds = 60;
         BugDataset bugdataset = new BugDataset(repoPath + "\\" + projName);
@@ -60,7 +59,7 @@ public class BugDataset {
                     new TraceCollectionHandler(repoPath, projName, i, traceCollectionTimeoutSeconds,
                             0, 0).handle(new Request(true));
                     BugData data = bugdataset.getData(i);
-                    System.out.println("Hello world");
+                    System.out.println(data);
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
@@ -248,6 +247,19 @@ public class BugDataset {
             String testClassName = testCaseStr.substring(0, idxOfPound);
             String testMethodName = testCaseStr.substring(idxOfPound + 1, testCaseStr.indexOf("("));
             return new TestCase(testClassName, testMethodName, testCaseStr);
+        }
+
+        @Override
+        public String toString() {
+            return "BugData{" +
+                    "rootCauseNode=" + rootCauseNode +
+                    ", buggyTrace=" + buggyTrace +
+                    ", workingTrace=" + workingTrace +
+                    ", testCase=" + testCase +
+                    ", projectName='" + projectName + '\'' +
+                    ", workingProjectPath='" + workingProjectPath + '\'' +
+                    ", buggyProjectPath='" + buggyProjectPath + '\'' +
+                    '}';
         }
     }
     

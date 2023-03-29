@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 
 public class Log {
 	private Log() {}
-	public static final String DEFAULT_LOG_FILE_PATTERN = "D:\\chenghin\\logs\\dataset-creator%g.log";
+	public static final String DEFAULT_LOG_FILE_PATTERN = "E:\\chenghin\\logs\\dataset-creator%g.log";
 	private static FileHandler fileHandler = null;
 	private static final int LOG_FILE_SIZE = 1 * (int) Math.pow(5, 9); // 0.5GB
 	private static final int NUM_LOG_FILES = 4;
