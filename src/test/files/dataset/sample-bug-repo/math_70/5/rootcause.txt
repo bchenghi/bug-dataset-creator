@@ -1,2 +1,0 @@
-MutationReturnMathCommand#org.apache.commons.math.analysis.ComposableFunction#lines 233-233#[return Math.acos(d);
-]

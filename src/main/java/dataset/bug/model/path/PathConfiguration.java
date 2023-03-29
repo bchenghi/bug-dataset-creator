@@ -44,7 +44,7 @@ public abstract class PathConfiguration {
         TRACE, BUGGY_TRACE, PRECHECK, BUGGY_PRECHECK, TRACE_W_ASSERTS, BUGGY_TRACE_W_ASSERTS,
         BUGGY_EXCLUDES, TRACE_EXCLUDES;
 
-        protected static String getFileName(InstrumentatorFile fileType) {
+        public static String getFileName(InstrumentatorFile fileType) {
             switch (fileType) {
             case TRACE:
                 return DumpFilePathConfig.DEFAULT_TRACE_FILE;

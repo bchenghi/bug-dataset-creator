@@ -1,6 +1,7 @@
 package dataset.execution;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -85,12 +86,16 @@ public class Main {
                 PrecheckExecutionResult precheckExecutionResult = mutationFramework.runPrecheck();
                 if (!precheckExecutionResult.testCasePassed()) continue;
                 commands = mutationFramework.analyse(precheckExecutionResult.getCoverage());
-                for (int i = 0; i < commands.size(); i++) {
-                    MutationCommand command = commands.get(i);
-                    BuggyProject buggyProject = new BuggyProject(testCase, command, projectName);
-                    if (checkBuggyProjectAlreadyCloned(storedProjects, buggyProject)) {
-                        continue;
-                    }
+                if (commands.isEmpty()) {
+                    writeToFile(testCase.toString() + " " + commands.size() + "\n",
+                            "C:\\Users\\bchenghi\\Desktop\\testCasesWithCmdsCount.txt");
+                }
+//                for (int i = 0; i < commands.size(); i++) {
+//                    MutationCommand command = commands.get(i);
+//                    BuggyProject buggyProject = new BuggyProject(testCase, command, projectName);
+//                    if (checkBuggyProjectAlreadyCloned(storedProjects, buggyProject)) {
+//                        continue;
+//                    }
                     /**
                      * The number of buggy steps is not correct,
                      * but currently unsure of how to get it from the mutation handler
@@ -98,13 +103,13 @@ public class Main {
 //                    new DataSetCreationRunner(repoPath, projectName, bugId, INSTRUMENTATION_TIMEOUT, buggyProject,
 //                            pathConfiguration.getBugPath(projectName, String.valueOf(bugId)), originalProjectPath,
 //                            precheckExecutionResult.getTotalSteps(), precheckExecutionResult.getTotalSteps()).run();
-                    new DatasetWithoutTracesCreationRunner(repoPath, projectName, bugId, buggyProject,
-                            pathConfiguration.getBugPath(projectName, String.valueOf(bugId)), originalProjectPath,
-                            INSTRUMENTATION_TIMEOUT).run();
+//                    new DatasetWithoutTracesCreationRunner(repoPath, projectName, bugId, buggyProject,
+//                            pathConfiguration.getBugPath(projectName, String.valueOf(bugId)), originalProjectPath,
+//                            INSTRUMENTATION_TIMEOUT).run();
 //                executorService.submit(new DataSetCreationRunner(repoPath, projectName, bugId, INSTRUMENTATION_TIMEOUT, buggyProject,
 //                        pathConfiguration.getBugPath(projectName, String.valueOf(bugId)), originalProjectPath));
-                    bugId++;
-                }
+//                    bugId++;
+//                }
             } catch (RuntimeException | TimeoutException e) {
                 e.printStackTrace();
             }
@@ -149,5 +154,13 @@ public class Main {
             if (currBugId > maxBugId) maxBugId = currBugId;
         }
         return maxBugId;
+    }
+
+    private static void writeToFile(String str, String fileName) {
+        try (FileWriter fileWriter = new FileWriter(fileName, true)) {
+            fileWriter.append(str);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

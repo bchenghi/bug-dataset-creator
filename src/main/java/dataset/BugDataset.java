@@ -8,6 +8,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import dataset.bug.model.path.PathConfiguration;
+import dataset.execution.Request;
+import dataset.execution.handler.TraceCollectionHandler;
 import dataset.trace.TraceCreator;
 import org.apache.commons.io.FileUtils;
 
@@ -44,18 +47,24 @@ public class BugDataset {
 
     public static void main(String[] args) throws IOException {
         int largestBugId = 17426;
-        BugDataset bugdataset = new BugDataset("D:\\chenghin\\NUS\\math_70");
+        String repoPath = "D:\\chenghin\\NUS"; // To modify according to system
+        String projName = "math_70";
+        int traceCollectionTimeoutSeconds = 60;
+        BugDataset bugdataset = new BugDataset(repoPath + "\\" + projName);
         for (int i = 1; i <= largestBugId; i++) {
             ProjectMinimizer minimizer = bugdataset.createMinimizer(i);
             if (bugdataset.exists(i, true)) {
                 try {
                     bugdataset.unzip(i);
-                    //minimizer.maximise();
-                    bugdataset.getData(i);
+                    minimizer.maximise();
+                    new TraceCollectionHandler(repoPath, projName, i, traceCollectionTimeoutSeconds,
+                            0, 0).handle(new Request(true));
+                    BugData data = bugdataset.getData(i);
+                    System.out.println("Hello world");
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
-                    //minimizer.minimize();
+                    minimizer.minimize();
                     bugdataset.zip(i);
                 }
             }
@@ -164,6 +173,24 @@ public class BugDataset {
         String bugIdStr = Integer.toString(bugId);
         return new ProjectMinimizer(repoPath, pathConfig.getRelativeBuggyPath(projectName, bugIdStr), 
                 pathConfig.getRelativeFixPath(projectName, bugIdStr), pathConfig.getRelativeMetadataPath(projectName, bugIdStr));
+    }
+
+    public void moveTraceFiles(int bugId) {
+        String bugIdStr = Integer.toString(bugId);
+        String pathToBuggyTrace = pathConfig.getInstrumentatorFilePath(projectName,
+                bugIdStr, InstrumentatorFile.BUGGY_TRACE);
+        String pathToWorkingTrace = pathConfig.getInstrumentatorFilePath(projectName,
+                bugIdStr, InstrumentatorFile.TRACE);
+        File buggyTraceFile = new File(pathToBuggyTrace);
+        if (buggyTraceFile.exists()) {
+            buggyTraceFile.renameTo(new File("D:\\chenghin\\NUS\\math_70-traces\\" +
+                    bugIdStr + "\\" + InstrumentatorFile.getFileName(InstrumentatorFile.BUGGY_TRACE)));
+        }
+        File workingTraceFile = new File(pathToWorkingTrace);
+        if (workingTraceFile.exists()) {
+            workingTraceFile.renameTo(new File("D:\\chenghin\\NUS\\math_70-traces\\" +
+                    bugIdStr + "\\" + InstrumentatorFile.getFileName(InstrumentatorFile.TRACE)));
+        }
     }
     
     public static class BugData {

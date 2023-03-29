@@ -122,9 +122,10 @@ class BugDatasetTest {
         bugDataset = new BugDataset(REPO_PATH, PROJECT_NAME);
         clean();
     }
+
     @AfterEach
     void afterEach() throws IOException {
-        clean();
+        FileUtils.deleteDirectory(new File(REPO_PATH));
     }
 
     void clean() throws IOException {
