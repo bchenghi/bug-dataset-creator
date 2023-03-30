@@ -7,6 +7,24 @@ Run
 - `mvn dependency:purge-local-repository -DactTransitively=false`
 - `mvn -DskipTests=true install`
 
+## To read bugs
+Refer to `dataset.BugDataset#main`
+The following variables can be modified in the `main` method, based on your usage:
+- `repoPath` 
+- `projName`
+- `traceCollectionTimeoutSeconds`
+
+The main method then does the following for each bug.
+- Check a bug's zip directory exists
+- Unzips
+- Maximise the buggy project
+- Collects buggy and working traces
+- Reads the data (Creates BugData object. Contains the buggy/working traces, root cause number, test case name, etc)
+- Minimizes the buggy project
+- Zips
+
+Based on the usage, any of the above steps could be commented-out/removed.
+
 ## To update `instrumentator.jar`
 - Place `instrumentator.jar` to the root of the project
 - Run:
