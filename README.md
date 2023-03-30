@@ -1,7 +1,7 @@
 # bug-dataset-creator
 
 ## Set up
-Ensure maven is using Java 17. (`mvn --version`)
+Ensure maven is using Java 17 or higher. (`mvn --version`)
 
 Run 
 - `mvn dependency:purge-local-repository -DactTransitively=false`
