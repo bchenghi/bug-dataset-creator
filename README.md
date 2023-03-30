@@ -10,6 +10,7 @@ Run
 ## To read bugs
 Refer to `dataset.BugDataset#main`
 The following variables can be modified in the `main` method, based on your usage:
+- `largestBugId` 
 - `repoPath` 
 - `projName`
 - `traceCollectionTimeoutSeconds`
