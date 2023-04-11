@@ -8,7 +8,6 @@ import jmutation.model.TestCase;
 import jmutation.model.project.ProjectConfig;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeoutException;
@@ -59,7 +58,7 @@ public class TraceCollector implements Callable<ExecutionResult> {
         MicrobatConfig updatedMicrobatConfig = microbatConfig.setDumpFilePath(precheckDumpFilePath);
         ProjectExecutor projectExecutor = new ProjectExecutor(updatedMicrobatConfig, projectConfig);
         PrecheckExecutionResult precheckExecutionResult = projectExecutor.execPrecheck(testCase, false,
-                instrumentationTimeout);
+                instrumentationTimeout, false);
         if (precheckExecutionResult == null) {
             System.out.println("precheckExecutionResult was null");
             return Optional.empty();
@@ -71,6 +70,6 @@ public class TraceCollector implements Callable<ExecutionResult> {
         MicrobatConfig updatedMicrobatConfig = microbatConfig.setDumpFilePath(traceDumpFilePath).setExpectedSteps(
                 expectedSteps);
         ProjectExecutor projectExecutor = new ProjectExecutor(updatedMicrobatConfig, projectConfig);
-        return projectExecutor.exec(testCase, false, instrumentationTimeout);
+        return projectExecutor.exec(testCase, false, instrumentationTimeout, false);
     }
 }
