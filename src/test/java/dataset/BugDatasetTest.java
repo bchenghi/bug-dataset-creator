@@ -11,6 +11,7 @@ import java.util.List;
 
 import dataset.bug.minimize.ProjectMinimizer;
 import jmutation.utils.TraceHelper;
+import microbat.model.BreakPoint;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
 import org.apache.commons.io.FileUtils;
@@ -56,7 +57,7 @@ class BugDatasetTest {
     }
     
     @Test
-    void getData_bugDirProvided_getsCorrectData() throws IOException {
+    void getData_bugDirProvidedAndMinimized_getsCorrectData() throws IOException {
         BugData data = bugDataset.getData(1);
         assertTrue(data.getBuggyTrace().size() > 0);
         assertTrue(data.getWorkingTrace().size() > 0);
@@ -67,6 +68,10 @@ class BugDatasetTest {
         assertEquals(expectedTestCase.testClassName(), data.getTestCase().testClassName());
         assertEquals(expectedTestCase.testMethodName(), data.getTestCase().testMethodName());
         assertEquals(expectedTestCase.toString(), data.getTestCase().toString());
+        for (TraceNode node : data.getWorkingTrace().getExecutionList()) {
+            BreakPoint breakPoint = node.getBreakPoint();
+            assertFalse(breakPoint.getFullJavaFilePath().isEmpty());
+        }
     }
 
     // This one is a system test, we could put it in its own file

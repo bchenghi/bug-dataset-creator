@@ -24,11 +24,13 @@ import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
 import sav.common.core.SavRtException;
 
+import static jmutation.utils.TraceHelper.setClassPathsToBreakpoints;
+
 public class BugDataset {
     private final String projectName;
     private final String repoPath;
     private final MutationFrameworkPathConfiguration pathConfig;
-    
+
     public BugDataset(String repoPath, String projectName) {
         super();
         this.repoPath = repoPath;
@@ -127,6 +129,11 @@ public class BugDataset {
         try {
             buggyTrace = RunningInfo.readFromFile(pathToBuggyTrace).getMainTrace();
             workingTrace = RunningInfo.readFromFile(pathToWorkingTrace).getMainTrace();
+            File buggyProjectRoot = new File(pathConfig.getBuggyPath(projectName, bugIdStr));
+            if (buggyProjectRoot.exists()) {
+                setClassPathsToBreakpoints(buggyTrace, buggyProjectRoot);
+            }
+            setClassPathsToBreakpoints(workingTrace, new File(pathConfig.getFixPath(projectName, bugIdStr)));
         } catch (SavRtException e) {
             throw new IOException(e);
         }
