@@ -61,7 +61,7 @@ class BugDatasetTest {
         BugData data = bugDataset.getData(1);
         assertTrue(data.getBuggyTrace().size() > 0);
         assertTrue(data.getWorkingTrace().size() > 0);
-        assertEquals(7, data.getRootCauseNode());
+        assertEquals(1977, data.getRootCauseNode());
         assertEquals(PROJECT_NAME, data.getProjectName());
         TestCase expectedTestCase = new TestCase("org.apache.commons.math.analysis.ComposableFunctionTest",
                 "testComposition", "org.apache.commons.math.analysis.ComposableFunctionTest#testComposition(),54,102");
@@ -108,12 +108,20 @@ class BugDatasetTest {
     }
 
     @Test
+    void parseRootCauseStr_RootCauseStr_ReturnsCorrectRootCause() {
+        String rootCauseStr = "MutationMathOperatorCommand#org.apache.commons.math.analysis.BinaryFunction#lines 37-37#[x + y]";
+        BugDataset.RootCause actual = bugDataset.parseRootCauseStr(rootCauseStr);
+        BugDataset.RootCause expected = new BugDataset.RootCause(37, 37, "org.apache.commons.math.analysis.BinaryFunction");
+        assertEquals(expected, actual);
+    }
+
+    @Test
     @DisabledIf("dataset.TestUtils#isRunningInGitHubActions")
     void getDataWithTraceCollection_zippedBugDirWithoutTraces_getsData() throws IOException {
         BugData data = bugDataset.getDataWithTraceCollection(5, 1);
         assertTrue(data.getBuggyTrace().size() > 0);
         assertTrue(data.getWorkingTrace().size() > 0);
-        assertEquals(7, data.getRootCauseNode());
+        assertEquals(1977, data.getRootCauseNode());
         assertEquals(PROJECT_NAME, data.getProjectName());
         TestCase expectedTestCase = new TestCase("org.apache.commons.math.analysis.ComposableFunctionTest",
                 "testComposition", "org.apache.commons.math.analysis.ComposableFunctionTest#testComposition(),54,102");

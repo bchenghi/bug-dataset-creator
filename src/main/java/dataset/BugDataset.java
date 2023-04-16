@@ -7,6 +7,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import dataset.execution.Request;
 import dataset.execution.handler.TraceCollectionHandler;
@@ -140,8 +141,8 @@ public class BugDataset {
             throw new IOException(e);
         }
         try {
-            RootCause rootCause = new RootCause(Files.readString(Path.of(pathToRootCauseFile)));
-            return new BugData(getRootCauseNode(rootCause, workingTrace), buggyTrace, workingTrace,
+            RootCause rootCause = parseRootCauseStr(Files.readString(Path.of(pathToRootCauseFile)));
+            return new BugData(getRootCauseNodeOrder(rootCause, workingTrace), buggyTrace, workingTrace,
                     Files.readString(Path.of(pathToTestCaseFile)), projectName,
                     pathConfig.getFixPath(projectName, bugIdStr),
                     pathConfig.getBuggyPath(projectName, bugIdStr));
@@ -163,7 +164,7 @@ public class BugDataset {
         return getData(bugId);
     }
     
-    private int getRootCauseNode(RootCause rootCause, Trace workingTrace) {
+    private int getRootCauseNodeOrder(RootCause rootCause, Trace workingTrace) {
         List<TraceNode> executionList = workingTrace.getExecutionList();
         for (TraceNode traceNode : executionList) {
             BreakPoint breakPoint = traceNode.getBreakPoint();
@@ -272,27 +273,47 @@ public class BugDataset {
         }
     }
     
-    private static class RootCause {
+    public static class RootCause {
         private final int startLineNum;
         private final int endLineNum;
         private final String className;
-        
-        public RootCause(String rootCauseStr) {
-            // Example: MutationMathOperatorCommand#org.apache.commons.math.analysis.BinaryFunction#lines 37-37#[x + y]
-            List<Integer> poundSymbolLocations = new ArrayList<>();
-            for (int i = 0; i < rootCauseStr.length(); i++) {
-                char c = rootCauseStr.charAt(i);
-                if (c == '#') {
-                    poundSymbolLocations.add(i);
-                }
-            }
-            className = rootCauseStr.substring(poundSymbolLocations.get(0) + 1, poundSymbolLocations.get(1));
-            String lineNumStr = rootCauseStr.substring(poundSymbolLocations.get(1) + 1, poundSymbolLocations.get(2));
-            int idxOfDashInLineNumStr = lineNumStr.indexOf("-");
-            String startLineStr = lineNumStr.substring(7, idxOfDashInLineNumStr); // skip the "lines" part
-            startLineNum = Integer.parseInt(startLineStr);
-            String endLineStr = lineNumStr.substring(idxOfDashInLineNumStr + 1);
-            endLineNum = Integer.parseInt(endLineStr);
+
+        public RootCause(int startLineNum, int endLineNum, String className) {
+            this.startLineNum = startLineNum;
+            this.endLineNum = endLineNum;
+            this.className = className;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            RootCause rootCause = (RootCause) o;
+            return startLineNum == rootCause.startLineNum && endLineNum == rootCause.endLineNum && Objects.equals(className, rootCause.className);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(startLineNum, endLineNum, className);
+        }
+    }
+
+    public RootCause parseRootCauseStr(String rootCauseStr) {
+        // Example: MutationMathOperatorCommand#org.apache.commons.math.analysis.BinaryFunction#lines 37-37#[x + y]
+        List<Integer> poundSymbolLocations = new ArrayList<>();
+        for (int i = 0; i < rootCauseStr.length(); i++) {
+            char c = rootCauseStr.charAt(i);
+            if (c == '#') {
+                poundSymbolLocations.add(i);
+            }
+        }
+        String className = rootCauseStr.substring(poundSymbolLocations.get(0) + 1, poundSymbolLocations.get(1));
+        String lineNumStr = rootCauseStr.substring(poundSymbolLocations.get(1) + 1, poundSymbolLocations.get(2));
+        int idxOfDashInLineNumStr = lineNumStr.indexOf("-");
+        String startLineStr = lineNumStr.substring(6, idxOfDashInLineNumStr); // skip the "lines" part
+        int startLineNum = Integer.parseInt(startLineStr);
+        String endLineStr = lineNumStr.substring(idxOfDashInLineNumStr + 1);
+        int endLineNum = Integer.parseInt(endLineStr);
+        return new RootCause(startLineNum, endLineNum, className);
     }
 }
