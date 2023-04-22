@@ -50,7 +50,7 @@ public class BugDataset {
     public static void main(String[] args) throws IOException {
         // These 4 variables can be modified based on usage
         int largestBugId = 17426;
-        String repoPath = "E:\\chenghin";
+        String repoPath = "E:\\david";
         String projName = "math_70";
         int traceCollectionTimeoutSeconds = 60;
 
