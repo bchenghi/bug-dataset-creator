@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import dataset.bug.model.path.PathConfiguration;
 import dataset.execution.Request;
 import dataset.execution.handler.TraceCollectionHandler;
 import dataset.trace.TraceCreator;
@@ -55,26 +56,37 @@ public class BugDataset {
         int traceCollectionTimeoutSeconds = 60;
 
         BugDataset bugdataset = new BugDataset(repoPath + "\\" + projName);
+        PathConfiguration pathConfig = new MutationFrameworkPathConfiguration(repoPath);
         for (int i = 1; i <= largestBugId; i++) {
-            ProjectMinimizer minimizer = bugdataset.createMinimizer(i);
-            if (bugdataset.exists(i, true)) { // Check the bug's zip directory exists
+            if (bugdataset.exists(i, false)) { // Check the bug's directory exists
                 try {
-                    bugdataset.unzip(i);
-                    minimizer.maximise();
                     new TraceCollectionHandler(repoPath, projName, i, traceCollectionTimeoutSeconds,
                             0, 0).handle(new Request(true));
                     BugData data = bugdataset.getData(i);
                     System.out.println(data);
+                    bugdataset.deleteInstrumentationFiles(pathConfig, projName, String.valueOf(i));
                 } catch (IOException e) {
                     e.printStackTrace();
-                } finally {
-                    minimizer.minimize();
-                    bugdataset.zip(i);
                 }
             }
         }
     }
-    
+
+    private void deleteInstrumentationFiles(PathConfiguration pathConfig, String projName, String bugIdString)
+            throws IOException{
+        String buggyTracePath =
+                pathConfig.getInstrumentatorFilePath(projName, bugIdString, InstrumentatorFile.BUGGY_TRACE);
+        Files.deleteIfExists(Path.of(buggyTracePath));
+        String fixedTracePath = pathConfig.getInstrumentatorFilePath(projName, bugIdString, InstrumentatorFile.TRACE);
+        Files.deleteIfExists(Path.of(fixedTracePath));
+        String fixedTraceExcludesPath =
+                pathConfig.getInstrumentatorFilePath(projName, bugIdString, InstrumentatorFile.TRACE_EXCLUDES);
+        Files.deleteIfExists(Path.of(fixedTraceExcludesPath));
+        String buggyTraceExcludesPath =
+                pathConfig.getInstrumentatorFilePath(projName, bugIdString, InstrumentatorFile.BUGGY_EXCLUDES);
+        Files.deleteIfExists(Path.of(buggyTraceExcludesPath));
+    }
+
     // Create bug id ranges based on specified size.
     private List<int[]> createBugRanges(long gbSize, int largestBugId) throws IOException {
         List<int[]> result = new ArrayList<>();
