@@ -72,7 +72,7 @@ public class BugDataset {
         }
     }
 
-    private void deleteInstrumentationFiles(PathConfiguration pathConfig, String projName, String bugIdString)
+    public void deleteInstrumentationFiles(PathConfiguration pathConfig, String projName, String bugIdString)
             throws IOException{
         String buggyTracePath =
                 pathConfig.getInstrumentatorFilePath(projName, bugIdString, InstrumentatorFile.BUGGY_TRACE);
