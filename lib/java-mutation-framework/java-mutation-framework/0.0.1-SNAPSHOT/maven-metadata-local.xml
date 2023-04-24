@@ -2,23 +2,23 @@
 <metadata modelVersion="1.1.0">
   <groupId>java-mutation-framework</groupId>
   <artifactId>java-mutation-framework</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
   <versioning>
+    <lastUpdated>20230424075620</lastUpdated>
     <snapshot>
       <localCopy>true</localCopy>
     </snapshot>
-    <lastUpdated>20230330071509</lastUpdated>
     <snapshotVersions>
       <snapshotVersion>
         <extension>jar</extension>
         <value>0.0.1-SNAPSHOT</value>
-        <updated>20230330071509</updated>
+        <updated>20230424075620</updated>
       </snapshotVersion>
       <snapshotVersion>
         <extension>pom</extension>
         <value>0.0.1-SNAPSHOT</value>
-        <updated>20230212095540</updated>
+        <updated>20230424075620</updated>
       </snapshotVersion>
     </snapshotVersions>
   </versioning>
+  <version>0.0.1-SNAPSHOT</version>
 </metadata>
